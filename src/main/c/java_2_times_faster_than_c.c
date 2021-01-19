@@ -77,6 +77,7 @@ int main() {
     insert(toInsert, newNode(nodeId++));
   }
   long checksum = 0;
+  head = toInsert;
   Node *traveler = head;
   do {
     checksum += traveler->id;
