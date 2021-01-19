@@ -1,6 +1,7 @@
 # idea files
 /.idea/*
 !/.idea/google-java-format.xml
+!/.idea/copyright
 
 # gradle
 /build
