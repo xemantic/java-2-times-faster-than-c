@@ -1,6 +1,7 @@
 # java-2-times-faster-than-c
 _An experiment showing double performance of the code running on JVM comparing to equivalent native C code_
 
+![artwork](https://repository-images.githubusercontent.com/330790563/c56fa080-5a76-11eb-81d2-515c4cc4b42d)
 
 ## What??? How?
 
