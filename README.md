@@ -75,7 +75,7 @@ code I compiled back then in 1997 still just runs on the newest JVM of
 Java 15. I cannot say the same about the code from this time written in Pascal,
 Assembler, C, C++. The promise
 "[Write once, run anywhere](https://en.wikipedia.org/wiki/Write_once,_run_anywhere)", given me buy
-legendary [Sun Microsystems](https://en.wikipedia.org/wiki/Sun_Microsystems)
+legendary [Sun Microsystems](https://en.wikipedia.org/wiki/Sun_Microsystems),
 was kept while the whole runtime and toolchain became open source. This is the actual
 superpower of Java I want to pay tribute to - it has been helping me in building
 complex software systems for years, with the speed of incremental compilers inherent to the
