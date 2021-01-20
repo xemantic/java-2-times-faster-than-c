@@ -14,47 +14,27 @@ plethora of cases. I rarely code Java myself these days.
 ## My typical dialog from the past days
 
 "Your code running on virtual machine will be ALWAYS slower than equivalent native code."
-
 "Why?"
-
 "Because of automatic memory management."
-
 "Why is it so?"
-
 "Things like automatic memory management ALWAYS add additional overhead to execution."
-
 "Hmm, let me try, here is a code in Java, and direct equivalent in C,
 the first one is almost 2 times faster."
-
 "It's because you are doing things wrong. No one would write C code like this."
-
 "Why?"
-
 "Because you need to properly manage your memory for efficiency."
-
 "How do you do it?"
-
 "Depending on your problem, sometimes even by adding automatic memory management."
-
 "Ok, so did you just make contradictory statements?"
-
 "I don't think so, just add these few lines to your code."
-
 "Do you think it's still the same algorithm afterwards?"
-
 "Yeah."
-
 "But is your memory management solution adjusted to this specific C code and 
 therefore extending the algorithm?"
-
 "Yeah."
-
 "So it's no longer algorithmically equivalent code, isn't it?"
-
 "Yeah."
-
 "Did you just make contradictory statements again?"
-
 "I don't think so."
 
 
@@ -84,7 +64,7 @@ of memory management into my original code, therefore I wouldn't call it "equiva
 in algorithmic sense. 
 
 I've received amazing feedback showing me how to achieve extremely efficient memory management
-in C, for example in ticket #1, and I am grateful for this contribution and opportunity
+in C, for example in ticket [#1](issues/1), and I am grateful for this contribution and opportunity
 to learn. But still I see no good reasons to alter the C code of this project, maybe
 rather extending the algorithm to allocate nodes holding additional payload of variable size,
 because it was my initial idea, which I skipped for the sake of simplicity, but now I see that it
@@ -99,7 +79,7 @@ My experience of writing complex distributed systems, and also my intuition, tel
 they are pretty common, and I have a feeling that these cases are rarely covered in microbenchmarks.
 If there is a minimal thing I want to achieve with this experiment, it is to convince myself
 and the others, to always question certain dogmas of modern software development and validity
-of certain arguments in given context. Please check comment from issue #2 as an exemplum
+of certain arguments in given context. Please check issue [#2](issues/2) as an exemplum
 of what I am referring to.
 
 
