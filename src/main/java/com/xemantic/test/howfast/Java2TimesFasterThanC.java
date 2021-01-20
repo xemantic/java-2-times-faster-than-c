@@ -44,6 +44,7 @@ public class Java2TimesFasterThanC {
     void delete() {
       next.previous = previous;
       previous.next = next;
+      // free memory (which is explicit in C and implicit in Java)
     }
 
     void insert(Node node) {
