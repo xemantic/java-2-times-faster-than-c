@@ -64,6 +64,8 @@ The code is almost the same in both languages, still using typical conventions o
 
 * [Java2TimesFasterThanC.java](src/main/java/com/xemantic/test/howfast/Java2TimesFasterThanC.java)
 * [java_2_times_faster_than_c.c](src/main/c/java_2_times_faster_than_c.c)
+* [java_faster_than_go.go](src/main/go/java_faster_than_go.go)
+
 
 I am pretty convinced that algorithmically they are equal, except for obvious explicit memory
 releasing in C version. Here is an
@@ -99,8 +101,15 @@ My experience of writing complex distributed systems, and also my intuition, tel
 they are pretty common, and I have a feeling that these cases are rarely covered in microbenchmarks.
 If there is a minimal thing I want to achieve with this experiment, it is to convince myself
 and the others, to always question certain dogmas of modern software development and validity
-of certain arguments in given context. Please check issue [#2](../../issues/2) as an exemplum
-of what I am referring to.
+of certain arguments in given context. Please check issue [#2](../../issues/2) as an example of what I am referring to.
+
+
+## Speeding up GO version
+
+Following the same aspiration of speeding up C version , is to keep the code simplistic as possible
+as you can see running the code with profiler (add --cpuprofile=./profile.out) ,time spent mostly on object allocation and GC.
+At the code level we can optimize the datastructure and allocation alongside fine tune the initial garbage collection target percentage
+or take control of the GC and run it manually. 
 
 
 ## Does it have any practical implications?
@@ -211,7 +220,8 @@ improvement, but they can also be misused terribly.
 In the project dir:
 
 ```console
-$ ./build-c.sh
+$ ./build-c.
+$ ./build-go.sh
 $ ./gradlew build
 ```
 
@@ -230,6 +240,15 @@ checksum: 5000000494530
 real	0m34,139s
 user	0m34,831s
 sys	0m0,386s
+
+
+$ time ./build/go/java_faster_than_go
+checksum: 5000000494530
+
+real    2m30.430s
+user    2m38.641s
+sys 0m0.224s
+
 ```
 
 
@@ -237,7 +256,6 @@ sys	0m0,386s
 
 I would like to test equivalent code with some other languages:
 
- * Go
  * Rust
  * C#
  * Kotlin on JVM  
