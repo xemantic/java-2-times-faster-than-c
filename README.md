@@ -318,6 +318,27 @@ MemAvailable:    4814532 kB
 </p>
 </details> 
 
+## Contributions
+
+### C# version
+
+Contributed by [hercegyu](https://github.com/hercegyu) 
+
+```console
+$ wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+$ sudo dpkg -i packages-microsoft-prod.deb
+$ sudo apt-get update
+$ sudo apt-get install dotnet-sdk-5.0
+$ ./build-csharp
+$ time ./build/csharp/java-4-times-faster-than-c-sharp 
+node count: 1079
+checksum: 410502150
+
+real    3m11,511s
+user    3m10,530s
+sys     0m8,327s
+```
+
 
 ## Future research
 
@@ -325,7 +346,6 @@ I would like to test equivalent code with some other languages:
 
  * Go
  * Rust
- * C#
  * Kotlin on JVM  
  * JavaScript on node and in the browser
  * Kotlin transpiled to JS also on node and in the browser
