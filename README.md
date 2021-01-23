@@ -199,7 +199,7 @@ was kept while the whole runtime and toolchain became open source. This is the a
 superpower of Java I want to pay tribute to - it has been helping me in building
 complex software systems for years, with the speed of great toolchain of remote debuggers,
 statistical profilers and incremental compilers inherent to the design of the language from equally
-legendary[James Gosling](https://en.wikipedia.org/wiki/James_Gosling).
+legendary [James Gosling](https://en.wikipedia.org/wiki/James_Gosling).
 
 I rarely code Java myself these days, rather GLSL, JavaScript, HTML, CSS and Kotlin, the last one
 still usually running on JVM, although with JavaScript and native as possible compilation
