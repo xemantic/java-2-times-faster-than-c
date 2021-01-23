@@ -255,16 +255,16 @@ $ time ./build/c/java_2_times_faster_than_c
 node count: 1079
 checksum: 410502150
 
-real	1m17,218s
-user	1m17,210s
+real    1m17,218s
+user    1m17,210s
 sys	    0m0,004s
 $ time java -cp build/classes/java/main com.xemantic.test.howfast.Java2TimesFasterThanC
 node count: 1079
 checksum: 410502150
 
-real	0m23,768s
-user	0m24,515s
-sys	    0m0,731s
+real    0m23,768s
+user    0m24,515s
+sys     0m0,731s
 ```
 
 
