@@ -22,14 +22,14 @@
 
 const long ITERATION_COUNT = 1000000000L;
 
-double almostpseudorandom(long ordinal) {
+double almost_pseudo_random(long ordinal) {
   return fmod(sin(((double) ordinal) * 100000.0) + 1.0, 1.0);
 }
 
 void main() {
   double checksum = 0;
   for (long i = 0; i < ITERATION_COUNT; i++) {
-    checksum += almostpseudorandom(i);
+    checksum += almost_pseudo_random(i);
   }
   printf("checksum: %f\n", checksum);
 }
