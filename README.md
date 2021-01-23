@@ -62,8 +62,8 @@ plethora of cases. I rarely code Java myself these days.
 
 The code is almost the same in both languages, still using typical conventions of both of them:
 
-* [Java2TimesFasterThanC.java](src/main/java/com/xemantic/test/howfast/Java2TimesFasterThanC.java)
 * [java_2_times_faster_than_c.c](src/main/c/java_2_times_faster_than_c.c)
+* [Java2TimesFasterThanC.java](src/main/java/com/xemantic/test/howfast/Java2TimesFasterThanC.java)
 
 I am pretty convinced that algorithmically they are equal, except for obvious explicit memory
 releasing in C version. Here is an
@@ -72,8 +72,33 @@ shedding some light on my results.
 
 I haven't written any C code for 2 decades and it was nice to write some now, to rediscover how
 close and influenced Java actually is by C, and how it is designed to run surprisingly close
-to the hardware (primitive data types). The code is establishing a ring of nodes first, and then
-traversing it continuously while deleting nodes in one direction and inserting them in another.
+to the hardware (primitive data types).
+
+The code is establishing a ring of nodes first, and then mutating it continuously while
+deleting nodes in one direction and inserting them in another.
+The number of inserted and deleted nodes is unpredictable. The same applies to the size
+of a node. Still the pseudo random distribution will be exactly the same for Java and C.
+
+To achieve this, I took deterministic, almost random distribution I often use in GLSL,
+which I borrowed from [The Book of Shaders](https://thebookofshaders.com/). I also wrote
+a benchmark for this one:
+
+* [almost_pseudo_random.c](src/main/c/almost_pseudo_random.c)
+* [AlmostPseudoRandom](src/main/java/com/xemantic/test/howfast/AlmostPseudoRandom.java)
+
+I was expecting this time C code to be 2 times faster, but to my surprise Java version is faster
+again (although not 2 times), which I cannot explain. I have many hypothesis:
+
+* HotSpot is doing some aggressive inlining possible after the running code is analyzed for a while.
+* C math functions are from the library, so maybe they actually cannot be inlined, while HotSpot
+  has the freedom of inlining whatever it pleases.
+* Unlike C, Java allows using the `%` operator also for floating point numbers. It might be mapped
+  onto more effective machine code.
+
+Please feel free to disassemble the code and create PR with proper explanation. It is also
+possible to dump assembly running on JVM:
+
+https://wiki.openjdk.java.net/display/HotSpot/PrintAssembly
 
 
 ## Speeding up C version
@@ -81,14 +106,15 @@ traversing it continuously while deleting nodes in one direction and inserting t
 My example is pushing things to absurd, for a reason. Of course it is possible to outperform
 Java version by managing memory better in C. But it would imply embedding additional algorithms
 of memory management into my original code, therefore I wouldn't call it "equivalent" anymore
-in algorithmic sense. 
+in algorithmic sense, because memory allocation, and releasing it implicitly or explicitly,
+is a crucial part of this algorithm.
 
-I've received amazing feedback showing me how to achieve extremely efficient memory management
-in C, for example in ticket [#1](../../issues/1), and I am grateful for this contribution and opportunity
-to learn. But still I see no good reasons to alter the C code of this project, maybe
-rather extending the algorithm to allocate nodes holding additional payload of variable size,
-because it was my initial idea, which I skipped for the sake of simplicity, but now I see that it
-was a mistake somehow obscuring what I actually have in mind.
+While saying that, I've received amazing feedback showing me how to achieve extremely efficient
+memory management in C, for example in ticket [#1](../../issues/1), and I am grateful for this
+contribution and opportunity to learn. Therefore I would like to include also extra version of this
+algorithm in C, but with more efficient memory management, also taking variable size of data
+structures into account. Unfortunately my limited C experience does not allow me at this point to
+write it myself. :( If you feel up for this challenge, please contribute to this project.
 
 And here is my hypothesis:
 
@@ -96,11 +122,12 @@ And here is my hypothesis:
 expressed in the language assuming automatic memory management.**
 
 My experience of writing complex distributed systems, and also my intuition, tells me that
-they are pretty common, and I have a feeling that these cases are rarely covered in microbenchmarks.
-If there is a minimal thing I want to achieve with this experiment, it is to convince myself
-and the others, to always question certain dogmas of modern software development and validity
-of certain arguments in given context. Please check issue [#2](../../issues/2) as an exemplum
-of what I am referring to.
+these algorithms are pretty common, and in the same time I have a feeling that these cases are
+rarely covered in microbenchmarks comparing speed of the code expressed and compiled in
+different languages. If there is a minimal thing I want to achieve with this experiment, it is to
+convince myself and others, to always question certain dogmas of modern software development and
+validity of certain arguments in given context. Please check issue [#2](../../issues/2) as an
+exemplum of what I am referring to.
 
 
 ## Does it have any practical implications?
@@ -116,11 +143,13 @@ each case than make categorical statements.
 
 Common wisdom from microbenchmarks is usually showing JVM to be around 10%-20% percent
 slower than the equivalent optimized native code, with big outliers in favor of the
-native code. But how do these tests actually compare to real life code where most of the software is
-using data structures already standardized for each language?
+native code. My simplest microbenchmark with `almost pseudo random` is showing something
+opposite, but I wouldn't jump to any conclusion from it.
 
-I don't know of any benchmarks which can objectively measure the effects which I am describing here
-in generic way. I don't believe that my experiment can be really scaled. But I believe that the
+But how do these tests actually compare to real life code where most of the software is
+using data structures already standardized for each language?
+I don't know of any benchmarks which can objectively, in generic way, measure the effects which I
+am describing here. I don't believe that my experiment can be really scaled. But I believe that the
 power of certain algorithmic expressiveness improves the performance
 instead of degrading it, like in case of [reactive programming](https://en.wikipedia.org/wiki/Reactive_programming)
 paradigm. Of course by principle, at the end of the day, everything can be reduced to machine code,
@@ -135,12 +164,12 @@ system from entering the [thrashing state](https://en.wikipedia.org/wiki/Thrashi
 with tools like [circuit breakers](https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern).
 If your code represents typical dynamic web stack, with data retrieved from the database, possibly
 streamed, and converted to JSON on the fly, each request typically involves myriads of new data
-instances of unpreditable size in the pipeline, which are immediately discarded at the end of the
+instances of unpredictable size in the pipeline, which are immediately discarded at the end of the
 request. The goal is to minimize the response time and virtual machines seem to greatly contribute
 to that.
 
 
-## Myths
+## Myths and Urban Legends of modern computing :)
 
 Just to recapitulate the myths associated with virtual machines and automatic memory management:
 
@@ -152,6 +181,7 @@ None of these seem to be true these days:
 
  * it seems that the code executing on VM can be actually quite optimal thanks to
    technologies like [HotSpot](https://en.wikipedia.org/wiki/HotSpot_(virtual_machine))
+   which even my simplest benchmark shows.
  * garbage collection can actually greatly improve the performance of common algorithms
  * on JVM GC is mostly happening as a parallel operation these days
 
@@ -198,7 +228,8 @@ But I'm a natural born iconoclast, always eager to compare the myth with the rea
 in reality you will often hear "arguments from performance" which are equally often
 irrelevant to the context they are expressed in. Language is just a tool. Spoken is often
 cherished on the altar of national ideology and computer ones are often becoming a fetish
-of our idiosyncrasy which we impose on the others. We can do better.
+of our idiosyncrasy which we impose on the others. We can do better. I write WE, because
+obviously I am also not free from these tendencies. :)
 
 From my experience of leading brilliant software teams I've learned that the actual quality
 change in performance does not come from particular technology, but rather from the paradigm
@@ -217,20 +248,75 @@ $ ./gradlew build
 
 ## Running
 
+Here are tests results from my machine:
+
 ```console
 $ time ./build/c/java_2_times_faster_than_c 
-checksum: 5000000494530
+node count: 1079
+checksum: 410502150
 
-real	0m56,769s
-user	0m56,766s
-sys	0m0,001s
-$ time java -cp build/classes/java/main com.xemantic.test.howfast.Java2TimesFasterThanC 
-checksum: 5000000494530
+real	1m17,218s
+user	1m17,210s
+sys	    0m0,004s
+$ time java -cp build/classes/java/main com.xemantic.test.howfast.Java2TimesFasterThanC
+node count: 1079
+checksum: 410502150
 
-real	0m34,139s
-user	0m34,831s
-sys	0m0,386s
+real	0m23,768s
+user	0m24,515s
+sys	    0m0,731s
 ```
+
+
+
+
+<details>
+<summary>Click to see the specs of my machine</summary>
+<p>
+
+```console
+$ cat /proc/cpuinfo 
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 142
+model name	: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz
+stepping	: 10
+microcode	: 0xe0
+cpu MHz		: 700.046
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 22
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb invpcid_single pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid mpx rdseed adx smap clflushopt intel_pt xsaveopt xsavec xgetbv1 xsaves dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp md_clear flush_l1d
+vmx flags	: vnmi preemption_timer invvpid ept_x_only ept_ad ept_1gb flexpriority tsc_offset vtpr mtf vapic ept vpid unrestricted_guest ple pml ept_mode_based_exec
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs itlb_multihit srbds
+bogomips	: 3999.93
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+```
+x8 cores
+
+```console
+$ cat /proc/meminfo 
+MemTotal:       16102660 kB
+MemFree:          710648 kB
+MemAvailable:    4814532 kB
+// ...
+```
+
+</p>
+</details> 
 
 
 ## Future research
