@@ -7,3 +7,7 @@
 /build
 /.gradle
 /out
+
+# csharp
+/bin
+/obj
