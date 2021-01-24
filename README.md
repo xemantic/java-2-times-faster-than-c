@@ -201,6 +201,13 @@ complex software systems for years, with the speed of great toolchain of remote 
 statistical profilers and incremental compilers inherent to the design of the language from equally
 legendary [James Gosling](https://en.wikipedia.org/wiki/James_Gosling).
 
+But I also want to pay a tribute to C, which is powering the Linux kernel - the operating system
+we are using every day, even if we are not aware of it. It might be in our Android phone
+or tablet, router, and all the servers on the way passing the signal from one human brain
+to another. Even git itself, the tool managing source code of this project, is written in C.
+And all of it thanks to the charisma of one person -
+[Linus Torvalds](https://en.wikipedia.org/wiki/Linus_Torvalds).
+
 I rarely code Java myself these days, rather GLSL, JavaScript, HTML, CSS and Kotlin, the last one
 still usually running on JVM, although with JavaScript and native as possible compilation
 targets. My IDE runs on JVM as well. Sometimes I transpile Java to JavaScript. Sometimes
