@@ -5,7 +5,7 @@ _An experiment showing double performance of the code running on JVM comparing t
 
 :warning: The title of this project is provocative, and it is meant to be, to bring
 attention to certain ideas. Please read through this document before jumping to any conclusions.
-For now I will just say that the title applies just to the algorithm presented here, not to
+For now, I will just say that the title applies just to the algorithm presented here, not to
 Java and C in general. I am also the farthest away from convincing anyone to choose Java
 over any other language, and I even see good reasons to discourage you from using Java in
 plethora of cases. I rarely code Java myself these days.
@@ -13,7 +13,7 @@ plethora of cases. I rarely code Java myself these days.
 
 ## My typical dialog from the past days
 
-> "Your code running on virtual machine will be ALWAYS slower than equivalent native code."
+> "Your code running on a virtual machine will be ALWAYS slower than equivalent native code."
 > 
 > "Why?"
 > 
@@ -70,7 +70,7 @@ releasing in C version. Here is an
 [old but comprehensive article](https://www.ibm.com/developerworks/java/library/j-jtp09275/index.html)
 shedding some light on my results.
 
-I haven't written any C code for 2 decades and it was nice to write some now, to rediscover how
+I haven't written any C code for 2 decades, and it was nice to write some now, to rediscover how
 close and influenced Java actually is by C, and how it is designed to run surprisingly close
 to the hardware (primitive data types).
 
