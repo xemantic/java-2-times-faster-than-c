@@ -4,6 +4,7 @@ import (
 	"flag"
 	_ "fmt"
 	"log"
+	"math"
 	"os"
 	"runtime/pprof"
 )
@@ -46,25 +47,25 @@ func createNode(id int) *Node  {
 		payload: make([]byte ,size),
 	}
 
-	if size == 0 {
-		return n
-	}
+	if size == 0 { return n }
 
 	return fill(id, n, size)
 }
 
 func fill(id int, n *Node, size int) * Node {
-	payloadId := 0
-	if id > 127 { payloadId = 1 } else { payloadId = id }
-
-	// significantly improve performance
-	// more details - https://gist.github.com/taylorza/df2f89d5f9ab3ffd06865062a4cf015d
-	n.payload[0] = byte(payloadId)
+	// using native copy significantly improve performance
+	n.payload[0] = byte(id)
 	for j := 1; j < size; j *= 2 {
 		copy(n.payload[j:], n.payload[:j])
 	}
+
 	return n
 }
+
+func almostPseudoRandom(ordinal int64) float64  {
+	return math.Mod(math.Sin(float64(ordinal) * 100000) + 1, 1)
+}
+
 
 var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to `file`")
 
@@ -126,7 +127,7 @@ func main() {
 	for {
 		checksum += traveler.id + int64(len(traveler.payload))
 		if len(traveler.payload) > 0 {
-			checksum += int64(traveler.payload[0])
+			checksum += int64(int8(traveler.payload[0]))
 		}
 		traveler = traveler.next
 		if traveler == head {
