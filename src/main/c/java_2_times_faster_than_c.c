@@ -19,34 +19,51 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-const int NODE_COUNT = 1000;
-const long TRAVERSAL_COUNT = 5000000000L;
+const int  MAX_PAYLOAD_SIZE   = 10000;
+const int  INITIAL_NODE_COUNT = 1000;
+const long MUTATION_COUNT     = 10000000L;
+const int  MAX_MUTATION_SIZE  = 10;
 
 typedef struct Node Node;
 
 struct Node {
-  Node *previous;
-  Node *next;
-  long id;
-};
+  long   id;
+  int    size;
+  char   *payload;
+  Node   *previous;
+  Node   *next;
+} NodeDef;
 
-struct Node *newNode(long id) {
-  Node* node = malloc(sizeof(Node));
+double almost_pseudo_random(long ordinal) {
+  return fmod((sin(((double) ordinal) * 100000.0) + 1.0), 1.0);
+}
+
+Node *new_node(long id) {
+  int size = (int) (almost_pseudo_random(id) * MAX_PAYLOAD_SIZE);
+  int charId = (char) id;
+  Node *node = malloc(sizeof(NodeDef));
   node->id = id;
+  node->size = size;
+  node->payload = malloc(sizeof(char) * size);
+  for (int i = 0; i < size; i++) {
+    node->payload[i] = charId;
+  }
   return node;
 }
 
-void join(Node *root, Node *node) {
-  root->previous = node;
-  root->next = node;
-  node->previous = root;
-  node->next = root;
+void join(Node *alfa, Node *beta) {
+  alfa->previous = beta;
+  alfa->next = beta;
+  beta->previous = alfa;
+  beta->next = alfa;
 }
 
-void dispose(Node *node) { // delete is reserved in C
+void delete(Node *node) {
   node->next->previous = node->previous;
   node->previous->next = node->next;
+  free(node->payload);
   free(node);
 }
 
@@ -58,31 +75,42 @@ void insert(Node *previous, Node *node) {
 }
 
 int main() {
-  long nodeId = 0;
-  Node *head = newNode(nodeId++);
-  join(head, newNode(nodeId++));
-  for (int i = 2; i < NODE_COUNT; i++) {
-    insert(head, newNode(nodeId++));
+  long node_id = 0;
+  long mutation_seq = 0;
+  Node *head = new_node(node_id++);
+  join(head, new_node(node_id++));
+  for (int i = 2; i < INITIAL_NODE_COUNT; i++) {
+    insert(head, new_node(node_id++));
   }
-  Node *toDelete = head;
-  Node *toInsert = head;
-  for (long i = 0; i < TRAVERSAL_COUNT; i++) {
-    toInsert = toInsert->next;
-    Node *prevToDelete = toDelete->previous;
-    if (toInsert == toDelete) {
-      toInsert = toInsert->next;
+  long node_count = INITIAL_NODE_COUNT;
+  for (long i = 0; i < MUTATION_COUNT; i++) {
+    int delete_count = (int) (almost_pseudo_random(mutation_seq++) * (double) MAX_MUTATION_SIZE);
+    if (delete_count > (node_count - 2)) {
+      delete_count = (int) node_count - 2;
     }
-    dispose(toDelete);
-    toDelete = prevToDelete;
-    insert(toInsert, newNode(nodeId++));
+    for (int j = 0; j < delete_count; j++) {
+      Node *to_delete = head;
+      head = head->previous;
+      delete(to_delete);
+    }
+    node_count -= delete_count;
+    int insert_count = (int) (almost_pseudo_random(mutation_seq++) * (double) MAX_MUTATION_SIZE);
+    for (int j = 0; j < delete_count; j++) {
+      insert(head, new_node(node_id++));
+      head = head->next;
+    }
+    node_count += insert_count;
   }
   long checksum = 0;
-  head = toInsert;
   Node *traveler = head;
   do {
-    checksum += traveler->id;
+    checksum += traveler->id + traveler->size;
+    if (traveler->size > 0) {
+      checksum += traveler->payload[0];
+    }
   } while (
       (traveler = traveler->next) != head
   );
+  printf("node count: %lu\n", node_count);
   printf("checksum: %lu\n", checksum);
 }

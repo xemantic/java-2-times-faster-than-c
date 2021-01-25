@@ -19,19 +19,28 @@
 
 package com.xemantic.test.howfast;
 
+import java.util.Arrays;
+
 public class Java2TimesFasterThanC {
 
-  public static final int NODE_COUNT = 1000;
-  public static final long TRAVERSAL_COUNT = 5000000000L;
+  private static final int  MAX_PAYLOAD_SIZE   = 10000;
+  private static final int  INITIAL_NODE_COUNT = 1000;
+  private static final long MUTATION_COUNT     = 10000000L;
+  private static final int  MAX_MUTATION_SIZE  = 10;
 
   private static class Node {
 
     private Node previous;
     private Node next;
     private long id;
+    private byte[] payload;
 
     private Node(long id) {
       this.id = id;
+      payload = new byte[
+          (int) (almostPseudoRandom(id) * (double) MAX_PAYLOAD_SIZE)
+      ];
+      Arrays.fill(payload, (byte) id);
     }
 
     void join(Node node) {
@@ -56,33 +65,48 @@ public class Java2TimesFasterThanC {
 
   }
 
+  private static double almostPseudoRandom(long ordinal) {
+    return (Math.sin(((double) ordinal) * 100000.0) + 1.0) % 1.0;
+  }
+
   public static void main(String[] args) {
     long nodeId = 0;
+    long mutationSeq = 0;
     Node head = new Node(nodeId++);
     head.join(new Node(nodeId++));
-    for (int i = 2; i < NODE_COUNT; i++) {
+    for (int i = 2; i < INITIAL_NODE_COUNT; i++) {
       head.insert(new Node(nodeId++));
     }
-    Node toDelete = head;
-    Node toInsert = head;
-    for (long i = 0; i < TRAVERSAL_COUNT; i++) {
-      toInsert = toInsert.next;
-      Node prevToDelete = toDelete.previous;
-      if (toInsert == toDelete) {
-        toInsert = toInsert.next;
+    long nodeCount = INITIAL_NODE_COUNT;
+    for (long i = 0; i < MUTATION_COUNT; i++) {
+      int deleteCount = (int) (almostPseudoRandom(mutationSeq++) * (double) MAX_MUTATION_SIZE);
+      if (deleteCount > (nodeCount - 2)) {
+        deleteCount = (int) nodeCount - 2;
       }
-      toDelete.delete();
-      toDelete = prevToDelete;
-      toInsert.insert(new Node(nodeId++));
+      for (int j = 0; j < deleteCount; j++) {
+        Node toDelete = head;
+        head = head.previous;
+        toDelete.delete();
+      }
+      nodeCount -= deleteCount;
+      int insertCount = (int) (almostPseudoRandom(mutationSeq++) * (double) MAX_MUTATION_SIZE);
+      for (int j = 0; j < deleteCount; j++) {
+        head.insert(new Node(nodeId++));
+        head = head.next;
+      }
+      nodeCount += insertCount;
     }
     long checksum = 0;
-    head = toInsert;
     Node traveler = head;
     do {
-      checksum += traveler.id;
+      checksum += traveler.id + traveler.payload.length;
+      if (traveler.payload.length > 0) {
+        checksum += traveler.payload[0];
+      }
     } while (
         (traveler = traveler.next) != head
     );
+    System.out.println("node count: " + nodeCount);
     System.out.println("checksum: " + checksum);
   }
 

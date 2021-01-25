@@ -8,13 +8,16 @@ import (
 	"runtime/pprof"
 )
 
-const NodeCount int = 1000
-const TraversalCount int64 = 5000000000
+const MaxPayloadSize int = 10000
+const InitialNodeCount int = 1000
+const MutationCount int64 = 10000000
+const MaxMutationSize int = 10
 
 type Node struct {
-	value int
-	prev  *Node
-	next  *Node
+	id      int64
+	prev    *Node
+	next    *Node
+	payload []byte
 }
 
 func (node *Node) insert(newNode *Node) {
@@ -36,6 +39,33 @@ func (node *Node) join(newNode *Node) {
 	newNode.next = node
 }
 
+func createNode(id int) *Node  {
+	size := int(almostPseudoRandom(int64(id)) * float64(MaxPayloadSize))
+	n := &Node{
+		id:      int64(id),
+		payload: make([]byte ,size),
+	}
+
+	if size == 0 {
+		return n
+	}
+
+	return fill(id, n, size)
+}
+
+func fill(id int, n *Node, size int) * Node {
+	payloadId := 0
+	if id > 127 { payloadId = 1 } else { payloadId = id }
+
+	// significantly improve performance
+	// more details - https://gist.github.com/taylorza/df2f89d5f9ab3ffd06865062a4cf015d
+	n.payload[0] = byte(payloadId)
+	for j := 1; j < size; j *= 2 {
+		copy(n.payload[j:], n.payload[:j])
+	}
+	return n
+}
+
 var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to `file`")
 
 func main() {
@@ -54,41 +84,56 @@ func main() {
 	}
 
 	nodeId := 0
-	head := &Node{value: nodeId}
+	mutationSeq := 0
+	head := createNode(nodeId)
 	nodeId++
-	head.join(&Node{value: nodeId})
+	head.join(createNode(nodeId))
 
-	for i := 2; i < NodeCount; i++ {
+	for i := 2; i < InitialNodeCount; i++ {
 		nodeId++
-		head.insert(&Node{value: nodeId})
+		head.insert(createNode(nodeId))
 	}
+	nodeCount := InitialNodeCount
 
-	toDelete := head
-	toInsert := head
-
-	for i := int64(0); i < TraversalCount; i++ {
-		toInsert = toInsert.next
-		prevToDelete := toDelete.prev
-		if toInsert == toDelete {
-			toInsert = toInsert.next
+	for i := int64(0); i < MutationCount; i++ {
+		deleteCount := int(almostPseudoRandom(int64(mutationSeq)) * float64(MaxMutationSize))
+		mutationSeq++
+		if deleteCount > (nodeCount -2) {
+			deleteCount = nodeCount - 2
 		}
-		toDelete.delete()
-		toDelete = prevToDelete
-		nodeId++
-		toInsert.insert(&Node{value: nodeId})
+
+		for j := 0; j < deleteCount; j++ {
+			toDelete := head
+			head = head.prev
+			toDelete.delete()
+		}
+
+		nodeCount -= deleteCount
+		insertCount := int(almostPseudoRandom(int64(mutationSeq)) * float64(MaxMutationSize))
+		mutationSeq++
+
+		for j := 0; j < deleteCount; j++ {
+			nodeId++
+			head.insert(createNode(nodeId))
+			head = head.next
+		}
+		nodeCount += insertCount
 	}
 
-	checksum := 0
-	head = toInsert
+	var checksum int64 = 0
 	traveler := head
 
 	for {
-		checksum += traveler.value
+		checksum += traveler.id + int64(len(traveler.payload))
+		if len(traveler.payload) > 0 {
+			checksum += int64(traveler.payload[0])
+		}
 		traveler = traveler.next
 		if traveler == head {
 			break
 		}
 	}
 
+	println("node count:" ,nodeCount)
 	println("checksum: ", checksum)
 }
