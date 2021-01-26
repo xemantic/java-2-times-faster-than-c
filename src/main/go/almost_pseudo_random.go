@@ -1,5 +1,9 @@
 package main
 
+import (
+	"math"
+)
+
 const IterationCount int64 = 1000000000
 
 func main() {
