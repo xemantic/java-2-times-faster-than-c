@@ -1,5 +1,4 @@
 /*
- * Copyright 2021  Elad Hirsch
  * Copyright 2021  Kazimierz Pogoda
  *
  * This file is part of java-2-times-faster-than-c.
@@ -18,19 +17,14 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
-
-import (
-	"math"
-	"fmt"
-)
-
-const IterationCount int64 = 1000000000
-
-func main() {
-	var checksum float64 = 0
-	for i := int64(0); i < IterationCount; i++ {
-		checksum += math.Mod(math.Sin(float64(i) * 100000.0) + 1.0, 1.0)
-	}
-	fmt.Printf("checksum: %g\n", checksum)
+function runTest(scriptSrc) {
+  window.addEventListener("load", () => {
+    const script = document.createElement("script");
+    script.src = scriptSrc;
+    const startTime = performance.now();
+    script.onload = () => {
+      console.log("Execution time in milliseconds: " + (performance.now() - startTime));
+    }
+    document.head.appendChild(script);
+  });
 }

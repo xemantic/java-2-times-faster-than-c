@@ -1,6 +1,5 @@
 /*
  * Copyright 2021  Elad Hirsch
- * Copyright 2021  Kazimierz Pogoda
  *
  * This file is part of java-2-times-faster-than-c.
  *
@@ -18,19 +17,15 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+const ITERATION_COUNT = 100000000;
 
-import (
-	"math"
-	"fmt"
-)
-
-const IterationCount int64 = 1000000000
-
-func main() {
-	var checksum float64 = 0
-	for i := int64(0); i < IterationCount; i++ {
-		checksum += math.Mod(math.Sin(float64(i) * 100000.0) + 1.0, 1.0)
-	}
-	fmt.Printf("checksum: %g\n", checksum)
+function almostPseudoRandom(ordinal) {
+    return (Math.sin(ordinal * 100000.0) + 1.0) % 1.0;
 }
+
+let checksum = 0;
+for (let i = 0; i < ITERATION_COUNT; i++) {
+    checksum += almostPseudoRandom(i);
+}
+
+console.log("checksum: " + checksum);
