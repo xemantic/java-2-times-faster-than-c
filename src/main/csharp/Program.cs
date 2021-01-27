@@ -85,7 +85,7 @@ namespace csharp
 
                 nodeCount -= deleteCount;
                 var insertCount = (int) (AlmostPseudoRandom(mutationSeq++) * (double) MaxMutationSize);
-                for (var j = 0; j < deleteCount; j++)
+                for (var j = 0; j < insertCount; j++)
                 {
                     head.Insert(new Node(nodeId++));
                     head = head.Next;

@@ -1,5 +1,6 @@
 /*
  * Copyright 2021  Elad Hirsch
+ * Copyright 2021  Kazimierz Pogoda
  *
  * This file is part of java-2-times-faster-than-c.
  *
@@ -28,10 +29,10 @@ import (
 	"runtime/pprof"
 )
 
-const MaxPayloadSize int = 10000
+const MaxPayloadSize int   = 10000
 const InitialNodeCount int = 1000
-const MutationCount int64 = 10000000
-const MaxMutationSize int = 10
+const MutationCount int64  = 10000000
+const MaxMutationSize int  = 10
 
 type Node struct {
 	id      int64
@@ -108,10 +109,11 @@ func main() {
 	head := createNode(nodeId)
 	nodeId++
 	head.join(createNode(nodeId))
+	nodeId++
 
 	for i := 2; i < InitialNodeCount; i++ {
-		nodeId++
 		head.insert(createNode(nodeId))
+		nodeId++
 	}
 	nodeCount := InitialNodeCount
 
@@ -132,9 +134,9 @@ func main() {
 		insertCount := int(almostPseudoRandom(int64(mutationSeq)) * float64(MaxMutationSize))
 		mutationSeq++
 
-		for j := 0; j < deleteCount; j++ {
-			nodeId++
+		for j := 0; j < insertCount; j++ {
 			head.insert(createNode(nodeId))
+			nodeId++
 			head = head.next
 		}
 		nodeCount += insertCount

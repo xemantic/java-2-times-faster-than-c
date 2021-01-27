@@ -95,7 +95,7 @@ int main() {
     }
     node_count -= delete_count;
     int insert_count = (int) (almost_pseudo_random(mutation_seq++) * (double) MAX_MUTATION_SIZE);
-    for (int j = 0; j < delete_count; j++) {
+    for (int j = 0; j < insert_count; j++) {
       insert(head, new_node(node_id++));
       head = head->next;
     }

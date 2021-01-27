@@ -253,6 +253,7 @@ $ ./build-c.sh
 $ ./gradlew build
 ```
 
+
 ## Running
 
 Here are tests results from my machine:
@@ -260,33 +261,33 @@ Here are tests results from my machine:
 ```console
 $ time ./build/c/java_2_times_faster_than_c 
 node count: 1079
-checksum: 410502150
+checksum: 6751042228
 
-real    1m17,218s
-user    1m17,210s
-sys     0m0,004s
-$ time java -cp build/classes/java/main com.xemantic.test.howfast.Java2TimesFasterThanC
+real    1m21,495s
+user    1m20,703s
+sys     0m0,789s
+$ time java -cp build/classes/java/main com.xemantic.test.howfast.Java2TimesFasterThanC 
 node count: 1079
-checksum: 410502150
+checksum: 6751042228
 
-real    0m23,768s
-user    0m24,515s
-sys     0m0,731s
+real    0m23,129s
+user    0m23,813s
+sys     0m0,471s
 ```
 
 ```console
 $ time ./build/c/almost_pseudo_random
 checksum: 499999997.122350
 
-real    1m7,000s
-user    1m6,994s
-sys     0m0,000s
+real    1m6,143s
+user    1m6,132s
+sys     0m0,008s
 $ time java -cp build/classes/java/main com.xemantic.test.howfast.AlmostPseudoRandom 
 checksum: 4.9999999712235045E8
 
-real    0m52,777s
-user    0m52,756s
-sys     0m0,045s
+real    0m52,468s
+user    0m52,460s
+sys     0m0,032s
 ```
 
 <details>
@@ -337,6 +338,7 @@ MemAvailable:    4814532 kB
 </p>
 </details> 
 
+
 ## Contributions
 
 ### C# version
@@ -349,14 +351,15 @@ $ sudo dpkg -i packages-microsoft-prod.deb
 $ sudo apt-get update
 $ sudo apt-get install dotnet-sdk-5.0
 $ ./build-csharp
-$ time ./build/csharp/java-4-times-faster-than-c-sharp 
+$ time ./build/csharp/java-4-times-faster-than-c-sharp
 node count: 1079
-checksum: 410502150
+checksum: 6751042228
 
-real    3m11,511s
-user    3m10,530s
-sys     0m8,327s
+real    2m55,947s
+user    2m55,220s
+sys     0m9,273s
 ```
+
 
 ### Go version
 
@@ -368,42 +371,60 @@ $ ./build-go.sh
 
 $ time ./build/go/java_faster_than_go 
 node count: 1098
-checksum:  410498847
+checksum:  5725143793
 
-real    0m50,098s
-user    1m23,487s
-sys     0m5,556s
+real    0m54,318s
+user    1m28,668s
+sys     0m5,896s
 $ time ./build/go/almost_pseudo_random 
 checksum: 4.999999924931206e+08
 
-real    0m29,492s
-user    0m29,498s
-sys     0m0,020s
+real    0m29,803s
+user    0m29,816s
+sys     0m0,012s
 ```
 
 :information_source: Note that values slightly differ. Most likely it's because Go
 seems to have different implementation of trigonometric functions making the sequence
-of generated almost random numbers slightly different.
+of generated almost random numbers slightly different. It also seems that Go version
+of `almost pseudo random` test is 2 times faster than C and Java versions. This
+test is only calling `sin(x)` in a loop.
 
-### JavaScript version
+
+### JavaScript on node
 
 Contributed by [Elad Hirsch](https://github.com/eladh)
 
 ```console
-$ time node src/main/javascript/java_faster_than_javascript.js 
+$ time node src/main/javascript/java_faster_than_javascript.js
 node count: 1079
-checksum: 410502150
+checksum: 6751042228
 
-real    1m29,845s
-user    2m5,147s
-sys     0m25,646s
+real    1m30,769s
+user    2m12,409s
+sys     0m25,446s
 $ time node src/main/javascript/almost_pseudo_random.js 
 checksum: 499999997.12235045
 
-real    2m18,236s
-user    2m18,230s
-sys     0m0,004s
+real    2m16,909s
+user    2m16,892s
+sys     0m0,008s
 ```
+
+### Javascript in the browser
+
+:information_source: time in milliseconds
+
+#### Chrome
+
+* `java-faster-than-javascript.html`: `82826` - 1m22s
+* `almost-pseudo-random.html`: `186520` - 3min6s
+
+#### firefox
+
+* `java-faster-than-javascript.html`: `70736` - 1m10s
+* `almost-pseudo-random.html`: `84303` - 1m24s
+
 
 ## Future research
 

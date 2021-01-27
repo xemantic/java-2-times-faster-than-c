@@ -83,7 +83,7 @@ for (let i = 0; i < MUTATION_COUNT; i++) {
     }
     nodeCount -= deleteCount;
     let insertCount = Math.floor(almostPseudoRandom(mutationSeq++) * MAX_MUTATION_SIZE);
-    for (let j = 0; j < deleteCount; j++) {
+    for (let j = 0; j < insertCount; j++) {
         head.insert(new Node(nodeId++));
         head = head.next;
     }

@@ -90,7 +90,7 @@ public class Java2TimesFasterThanC {
       }
       nodeCount -= deleteCount;
       int insertCount = (int) (almostPseudoRandom(mutationSeq++) * (double) MAX_MUTATION_SIZE);
-      for (int j = 0; j < deleteCount; j++) {
+      for (int j = 0; j < insertCount; j++) {
         head.insert(new Node(nodeId++));
         head = head.next;
       }
