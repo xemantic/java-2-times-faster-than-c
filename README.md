@@ -274,8 +274,20 @@ user    0m24,515s
 sys     0m0,731s
 ```
 
+```console
+$ time ./build/c/almost_pseudo_random
+checksum: 499999997.122350
 
+real    1m7,000s
+user    1m6,994s
+sys     0m0,000s
+$ time java -cp build/classes/java/main com.xemantic.test.howfast.AlmostPseudoRandom 
+checksum: 4.9999999712235045E8
 
+real    0m52,777s
+user    0m52,756s
+sys     0m0,045s
+```
 
 <details>
 <summary>Click to see the specs of my machine</summary>
@@ -346,15 +358,59 @@ user    3m10,530s
 sys     0m8,327s
 ```
 
+### Go version
+
+Contributed by [Elad Hirsch](https://github.com/eladh)
+
+```console
+$ sudo apt-get install golang-go
+$ ./build-go.sh
+
+$ time ./build/go/java_faster_than_go 
+node count: 1098
+checksum:  410498847
+
+real    0m50,098s
+user    1m23,487s
+sys     0m5,556s
+$ time ./build/go/almost_pseudo_random 
+checksum: 4.999999924931206e+08
+
+real    0m29,492s
+user    0m29,498s
+sys     0m0,020s
+```
+
+:information_source: Note that values slightly differ. Most likely it's because Go
+seems to have different implementation of trigonometric functions making the sequence
+of generated almost random numbers slightly different.
+
+### JavaScript version
+
+Contributed by [Elad Hirsch](https://github.com/eladh)
+
+```console
+$ time node src/main/javascript/java_faster_than_javascript.js 
+node count: 1079
+checksum: 410502150
+
+real    1m29,845s
+user    2m5,147s
+sys     0m25,646s
+$ time node src/main/javascript/almost_pseudo_random.js 
+checksum: 499999997.12235045
+
+real    2m18,236s
+user    2m18,230s
+sys     0m0,004s
+```
 
 ## Future research
 
 I would like to test equivalent code with some other languages:
 
- * Go
  * Rust
  * Kotlin on JVM  
- * JavaScript on node and in the browser
  * Kotlin transpiled to JS also on node and in the browser
 
 Any contributions are welcome.

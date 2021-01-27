@@ -17,7 +17,7 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const ITERATION_COUNT = 100000000;
+const ITERATION_COUNT = 1000000000;
 
 function almostPseudoRandom(ordinal) {
     return (Math.sin(ordinal * 100000.0) + 1.0) % 1.0;
