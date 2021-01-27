@@ -411,6 +411,7 @@ user    2m16,892s
 sys     0m0,008s
 ```
 
+
 ### Javascript in the browser
 
 :information_source: time in milliseconds
@@ -424,6 +425,12 @@ sys     0m0,008s
 
 * `java-faster-than-javascript.html`: `70736` - 1m10s
 * `almost-pseudo-random.html`: `84303` - 1m24s
+
+
+### Kotlin
+
+Kotlin version the same time characteristics as Java version
+when running on the same JVM.
 
 
 ## Future research
