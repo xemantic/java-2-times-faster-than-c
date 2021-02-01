@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 const int  MAX_PAYLOAD_SIZE   = 10000;
@@ -47,9 +48,8 @@ Node *new_node(long id) {
   node->id = id;
   node->size = size;
   node->payload = malloc(sizeof(char) * size);
-  for (int i = 0; i < size; i++) {
-    node->payload[i] = charId;
-  }
+	memset(node->payload, charId, size);
+
   return node;
 }
 
