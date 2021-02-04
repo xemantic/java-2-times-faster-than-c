@@ -26,14 +26,15 @@ private const val INITIAL_NODE_COUNT = 10000
 private const val MUTATION_COUNT     = 1000000L
 private const val MAX_MUTATION_SIZE  = 200
 
-private fun almostPseudoRandom(ordinal: Long): Double {
-  return (sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
-}
+private fun almostPseudoRandom(ordinal: Long) =
+  (sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
 
 private class Node(val id: Long) {
   var previous: Node? = null
   var next: Node? = null
-  val payload: ByteArray = ByteArray((almostPseudoRandom(id) * MAX_PAYLOAD_SIZE).toInt())
+  val payload: ByteArray = ByteArray(
+    (almostPseudoRandom(id) * MAX_PAYLOAD_SIZE).toInt()
+  )
 
   init {
     for (i in payload.indices) {
@@ -74,7 +75,8 @@ fun main() {
   var nodeCount = INITIAL_NODE_COUNT.toLong()
   for (i in 0 until MUTATION_COUNT) {
     var deleteCount =
-      (almostPseudoRandom(mutationSeq++) * MAX_MUTATION_SIZE.toDouble()).toInt()
+      (almostPseudoRandom(mutationSeq++)
+          * MAX_MUTATION_SIZE.toDouble()).toInt()
     if (deleteCount > nodeCount - 2) {
       deleteCount = nodeCount.toInt() - 2
     }
@@ -85,7 +87,8 @@ fun main() {
     }
     nodeCount -= deleteCount.toLong()
     val insertCount =
-      (almostPseudoRandom(mutationSeq++) * MAX_MUTATION_SIZE.toDouble()).toInt()
+      (almostPseudoRandom(mutationSeq++)
+          * MAX_MUTATION_SIZE.toDouble()).toInt()
     for (j in 0 until insertCount) {
       head.insert(Node(nodeId++))
       head = head.next!!
