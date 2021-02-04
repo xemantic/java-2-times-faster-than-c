@@ -19,28 +19,28 @@
 
 package com.xemantic.test.howfast;
 
-import java.util.Arrays;
-
 public class Java2TimesFasterThanC {
 
-  private static final int  MAX_PAYLOAD_SIZE   = 10000;
-  private static final int  INITIAL_NODE_COUNT = 1000;
-  private static final long MUTATION_COUNT     = 10000000L;
-  private static final int  MAX_MUTATION_SIZE  = 10;
+  private static final int  MAX_PAYLOAD_SIZE   = 50;
+  private static final int  INITIAL_NODE_COUNT = 10000;
+  private static final long MUTATION_COUNT     = 1000000L;
+  private static final int  MAX_MUTATION_SIZE  = 200;
 
   private static class Node {
 
-    private Node previous;
-    private Node next;
-    private long id;
+    private long   id;
     private byte[] payload;
+    private Node   previous;
+    private Node   next;
 
     private Node(long id) {
       this.id = id;
-      payload = new byte[
-          (int) (almostPseudoRandom(id) * (double) MAX_PAYLOAD_SIZE)
-      ];
-      Arrays.fill(payload, (byte) id);
+      int size = (int) (almostPseudoRandom(id) * (double) MAX_PAYLOAD_SIZE);
+      byte[] data = new byte[size];
+      for (int i = 0; i < size; i++) {
+        data[i] = (byte) i;
+      }
+      payload = data;
     }
 
     void join(Node node) {
@@ -102,6 +102,7 @@ public class Java2TimesFasterThanC {
       checksum += traveler.id + traveler.payload.length;
       if (traveler.payload.length > 0) {
         checksum += traveler.payload[0];
+        checksum += traveler.payload[traveler.payload.length - 1];
       }
     } while (
         (traveler = traveler.next) != head

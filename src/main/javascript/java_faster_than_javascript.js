@@ -18,10 +18,10 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const MAX_PAYLOAD_SIZE   = 10000;
-const INITIAL_NODE_COUNT = 1000;
-const MUTATION_COUNT     = 10000000;
-const MAX_MUTATION_SIZE  = 10;
+const MAX_PAYLOAD_SIZE   = 50;
+const INITIAL_NODE_COUNT = 10000;
+const MUTATION_COUNT     = 1000000;
+const MAX_MUTATION_SIZE  = 200;
 
 function almostPseudoRandom(ordinal) {
     return (Math.sin(ordinal * 100000.0) + 1.0) % 1.0;
@@ -30,12 +30,12 @@ function almostPseudoRandom(ordinal) {
 class Node {
     constructor(id) {
         this.id = id;
-        this.payload = new Int8Array(
-          new ArrayBuffer(
-            Math.floor(almostPseudoRandom(id) * MAX_PAYLOAD_SIZE)
-          )
-        );
-        this.payload.fill(id);
+        const size = Math.floor(almostPseudoRandom(id) * MAX_PAYLOAD_SIZE);
+        const payload = new Int8Array(new ArrayBuffer(size));
+        for (let i = 0; i < size; i++) {
+          payload[i] = i;
+        }
+        this.payload = payload;
     }
 
     insert(node) {
@@ -98,8 +98,9 @@ do {
     checksum += traveler.id + traveler.payload.length;
     if (traveler.payload.length > 0) {
         checksum += (traveler.payload[0]);
+        checksum += (traveler.payload[traveler.payload.length - 1]);
     }
 } while ((traveler = traveler.next) !== head) {}
 
 console.log("node count: " + nodeCount);
-console.log("checksum: " + checksum)
+console.log("checksum: " + checksum);

@@ -19,26 +19,26 @@
 
 package com.xemantic.test.howfast.kotlin
 
-import java.util.*
+import kotlin.math.sin
 
-private const val MAX_PAYLOAD_SIZE   = 10000
-private const val INITIAL_NODE_COUNT = 1000
-private const val MUTATION_COUNT     = 10000000L
-private const val MAX_MUTATION_SIZE  = 10
+private const val MAX_PAYLOAD_SIZE   = 50
+private const val INITIAL_NODE_COUNT = 10000
+private const val MUTATION_COUNT     = 1000000L
+private const val MAX_MUTATION_SIZE  = 200
 
 private fun almostPseudoRandom(ordinal: Long): Double {
-  return (Math.sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
+  return (sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
 }
 
 private class Node(val id: Long) {
   var previous: Node? = null
   var next: Node? = null
-  val payload: ByteArray =
-    ByteArray((almostPseudoRandom(id) * MAX_PAYLOAD_SIZE).toInt())
+  val payload: ByteArray = ByteArray((almostPseudoRandom(id) * MAX_PAYLOAD_SIZE).toInt())
 
   init {
-    val byteId = id.toByte()
-    Arrays.fill(payload, byteId)
+    for (i in payload.indices) {
+      payload[i] = i.toByte()
+    }
   }
 
   fun join(node: Node) {
@@ -98,6 +98,7 @@ fun main() {
     checksum += traveler.id + traveler.payload.size
     if (traveler.payload.isNotEmpty()) {
       checksum += traveler.payload[0]
+      checksum += traveler.payload[traveler.payload.size - 1]
     }
   } while (traveler.next.also { traveler = it!! } !== head)
   println("node count: $nodeCount")

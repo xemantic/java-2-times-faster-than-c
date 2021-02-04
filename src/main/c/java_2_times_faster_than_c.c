@@ -19,13 +19,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 
-const int  MAX_PAYLOAD_SIZE   = 10000;
-const int  INITIAL_NODE_COUNT = 1000;
-const long MUTATION_COUNT     = 10000000L;
-const int  MAX_MUTATION_SIZE  = 10;
+const int  MAX_PAYLOAD_SIZE   = 50;
+const int  INITIAL_NODE_COUNT = 10000;
+const long MUTATION_COUNT     = 1000000L;
+const int  MAX_MUTATION_SIZE  = 200;
 
 typedef struct Node Node;
 
@@ -47,9 +46,11 @@ Node *new_node(long id) {
   Node *node = malloc(sizeof(NodeDef));
   node->id = id;
   node->size = size;
-  node->payload = malloc(sizeof(char) * size);
-	memset(node->payload, charId, size);
-
+  char *payload = malloc(sizeof(char) * size);
+  for (int i = 0; i < size; i++) {
+    payload[i] = (char) i;
+  }
+  node->payload = payload;
   return node;
 }
 
@@ -107,6 +108,7 @@ int main() {
     checksum += traveler->id + traveler->size;
     if (traveler->size > 0) {
       checksum += traveler->payload[0];
+      checksum += traveler->payload[traveler->size - 1];
     }
   } while (
       (traveler = traveler->next) != head

@@ -29,10 +29,10 @@ import (
 	"runtime/pprof"
 )
 
-const MaxPayloadSize int   = 10000
-const InitialNodeCount int = 1000
-const MutationCount int64  = 10000000
-const MaxMutationSize int  = 10
+const MaxPayloadSize int   = 50
+const InitialNodeCount int = 10000
+const MutationCount int64  = 1000000
+const MaxMutationSize int  = 200
 
 type Node struct {
 	id      int64
@@ -62,24 +62,14 @@ func (node *Node) join(newNode *Node) {
 
 func createNode(id int) *Node  {
 	size := int(almostPseudoRandom(int64(id)) * float64(MaxPayloadSize))
-	n := &Node{
-		id:      int64(id),
-		payload: make([]byte ,size),
+  data := make([]byte, size);
+  for i := 0; i < size; i++ {
+    data[i] = byte(i);
 	}
-
-	if size == 0 { return n }
-
-	return fill(id, n, size)
-}
-
-func fill(id int, n *Node, size int) * Node {
-	// using native copy significantly improve performance
-	n.payload[0] = byte(id)
-	for j := 1; j < size; j *= 2 {
-		copy(n.payload[j:], n.payload[:j])
-	}
-
-	return n
+	return &Node{
+    id:      int64(id),
+    payload: data,
+  }
 }
 
 func almostPseudoRandom(ordinal int64) float64 {

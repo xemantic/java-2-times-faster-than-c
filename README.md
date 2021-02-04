@@ -249,7 +249,8 @@ improvement, but they can also be misused terribly.
 In the project dir:
 
 ```console
-$ ./build-c.sh
+$ ./build-gcc.sh
+$ ./build-clang.sh
 $ ./gradlew build
 ```
 
@@ -259,35 +260,48 @@ $ ./gradlew build
 Here are tests results from my machine:
 
 ```console
-$ time ./build/c/java_2_times_faster_than_c 
-node count: 1079
-checksum: 6751042228
+$ time ./build/clang/java_2_times_faster_than_c 
+node count: 13537
+checksum: 470936697371
 
-real    1m21,495s
-user    1m20,703s
-sys     0m0,789s
+real    0m12,726s
+user    0m12,719s
+sys     0m0,004s
+$ time ./build/gcc/java_2_times_faster_than_c 
+node count: 13537
+checksum: 470936697371
+
+real    0m12,800s
+user    0m12,795s
+sys     0m0,004s
 $ time java -cp build/classes/java/main com.xemantic.test.howfast.Java2TimesFasterThanC 
-node count: 1079
-checksum: 6751042228
+node count: 13537
+checksum: 470936697371
 
-real    0m23,129s
-user    0m23,813s
-sys     0m0,471s
+real	0m8,569s
+user	0m8,701s
+sys	0m0,117s
 ```
 
 ```console
-$ time ./build/c/almost_pseudo_random
+$ time ./build/gcc/almost_pseudo_random 
 checksum: 499999997.122350
 
-real    1m6,143s
-user    1m6,132s
+real    1m4,433s
+user    1m4,424s
 sys     0m0,008s
+$ time ./build/clang/almost_pseudo_random 
+checksum: 499999997.122350
+
+real    1m4,878s
+user    1m4,877s
+sys     0m0,000s
 $ time java -cp build/classes/java/main com.xemantic.test.howfast.AlmostPseudoRandom 
 checksum: 4.9999999712235045E8
 
-real    0m52,468s
-user    0m52,460s
-sys     0m0,032s
+real    0m51,235s
+user    0m51,193s
+sys     0m0,056s
 ```
 
 <details>
@@ -351,13 +365,13 @@ $ sudo dpkg -i packages-microsoft-prod.deb
 $ sudo apt-get update
 $ sudo apt-get install dotnet-sdk-5.0
 $ ./build-csharp
-$ time ./build/csharp/java-4-times-faster-than-c-sharp
-node count: 1079
-checksum: 6751042228
+$ time ./build/csharp/java-4-times-faster-than-c-sharp 
+node count: 13537
+checksum: 470936697371
 
-real    2m55,947s
-user    2m55,220s
-sys     0m9,273s
+real    0m34,037s
+user    0m36,997s
+sys     0m2,925s
 ```
 
 
@@ -368,20 +382,13 @@ Contributed by [Elad Hirsch](https://github.com/eladh)
 ```console
 $ sudo apt-get install golang-go
 $ ./build-go.sh
-
 $ time ./build/go/java_faster_than_go 
-node count: 1098
-checksum:  5725143793
+node count: 13553
+checksum:  486105193130
 
-real    0m54,318s
-user    1m28,668s
-sys     0m5,896s
-$ time ./build/go/almost_pseudo_random 
-checksum: 4.999999924931206e+08
-
-real    0m29,803s
-user    0m29,816s
-sys     0m0,012s
+real    0m14,542s
+user    0m18,274s
+sys     0m0,345s
 ```
 
 :information_source: Note that values slightly differ. Most likely it's because Go
@@ -396,19 +403,26 @@ test is only calling `sin(x)` in a loop.
 Contributed by [Elad Hirsch](https://github.com/eladh)
 
 ```console
-$ time node src/main/javascript/java_faster_than_javascript.js
-node count: 1079
-checksum: 6751042228
+$ time node src/main/javascript/java_faster_than_javascript.js 
+node count: 13537
+checksum: 470936697371
 
-real    1m30,769s
-user    2m12,409s
-sys     0m25,446s
+real    1m6,196s
+user    1m13,707s
+sys     0m2,256s
+$ time node src/main/javascript/java_faster_than_node.js 
+node count: 13537
+checksum: 470936697371
+
+real    0m26,172s
+user    0m30,301s
+sys     0m0,628s
 $ time node src/main/javascript/almost_pseudo_random.js 
 checksum: 499999997.12235045
 
-real    2m16,909s
-user    2m16,892s
-sys     0m0,008s
+real    2m13,332s
+user    2m13,265s
+sys     0m0,060s
 ```
 
 
@@ -418,12 +432,12 @@ sys     0m0,008s
 
 #### Chrome
 
-* `java-faster-than-javascript.html`: `82826` - 1m22s
+* `java-faster-than-javascript.html`: `78857` - 1m19s
 * `almost-pseudo-random.html`: `186520` - 3min6s
 
 #### firefox
 
-* `java-faster-than-javascript.html`: `70736` - 1m10s
+* `java-faster-than-javascript.html`: `74803` - 1m14s
 * `almost-pseudo-random.html`: `84303` - 1m24s
 
 
@@ -438,7 +452,6 @@ when running on the same JVM.
 I would like to test equivalent code with some other languages:
 
  * Rust
- * Kotlin on JVM  
  * Kotlin transpiled to JS also on node and in the browser
 
 Any contributions are welcome.

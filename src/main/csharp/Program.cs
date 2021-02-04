@@ -5,10 +5,11 @@ namespace csharp
 {
     static class Program
     {
-        private const int MaxPayloadSize = 10000;
-        private const int InitialNodeCount = 1000;
-        private const long MutationCount = 10000000L;
-        private const int MaxMutationSize = 10;
+
+        private const int  MaxPayloadSize   = 50;
+        private const int  InitialNodeCount = 10000;
+        private const long MutationCount    = 1000000L;
+        private const int  MaxMutationSize  = 200;
 
         class Node
         {
@@ -20,7 +21,13 @@ namespace csharp
             public Node(long id)
             {
                 Id = id;
-                Payload = Enumerable.Repeat((byte) id, (int) (AlmostPseudoRandom(id) * (double) MaxPayloadSize)).ToArray();
+                int size = (int) (AlmostPseudoRandom(id) * (double) MaxPayloadSize);
+                byte[] data = new byte[size];
+                for (int i = 0; i < size; i++)
+                {
+                    data[i] = (byte) i;
+                }
+                Payload = data;
             }
 
             public void Join(Node node)
@@ -85,7 +92,7 @@ namespace csharp
 
                 nodeCount -= deleteCount;
                 var insertCount = (int) (AlmostPseudoRandom(mutationSeq++) * (double) MaxMutationSize);
-                for (var j = 0; j < insertCount; j++)
+                for (int j = 0; j < insertCount; j++)
                 {
                     head.Insert(new Node(nodeId++));
                     head = head.Next;
@@ -102,6 +109,7 @@ namespace csharp
                 if (traveler.Payload.Length > 0)
                 {
                     checksum += (SByte) traveler.Payload[0];        // byte in c# is unsigned, need to use Signed byte
+                    checksum += (SByte) traveler.Payload[traveler.Payload.Length - 1];
                 }
             } while (
                 (traveler = traveler.Next) != head
