@@ -389,6 +389,12 @@ checksum:  486105193130
 real    0m14,542s
 user    0m18,274s
 sys     0m0,345s
+$ time build/go/almost_pseudo_random 
+checksum: 4.999999924931206e+08
+
+real    0m28,191s
+user    0m28,202s
+sys     0m0,009s
 ```
 
 :information_source: Note that values slightly differ. Most likely it's because Go
