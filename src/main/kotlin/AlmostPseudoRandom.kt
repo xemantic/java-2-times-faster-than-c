@@ -19,10 +19,12 @@
 
 package com.xemantic.test.howfast.kotlin
 
+import kotlin.math.sin
+
 private const val ITERATION_COUNT = 1000000000L
 
 private fun almostPseudoRandom(ordinal: Long): Double {
-  return (Math.sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
+  return (sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
 }
 
 fun main() {
