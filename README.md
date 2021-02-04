@@ -443,8 +443,7 @@ sys     0m0,060s
 
 ### Kotlin
 
-Kotlin version the same time characteristics as Java version
-when running on the same JVM.
+Kotlin version has the same time characteristics as Java version when running on the same JVM.
 
 
 ## Future research
