@@ -90,7 +90,7 @@ impl Node {
     fn new(id: i64) -> NodePointer {
         Box::into_raw(Box::new(Self{
             id,
-            payload: vec![id as i8; (almost_pseudo_random(id) * MAX_PAYLOAD_SIZE as f64) as usize],
+            payload: (0..(almost_pseudo_random(id) * MAX_PAYLOAD_SIZE as f64) as i8).collect(),
             next: ptr::null_mut(),
             previous: ptr::null_mut(),
         }))
