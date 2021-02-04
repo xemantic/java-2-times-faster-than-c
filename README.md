@@ -452,11 +452,49 @@ sys     0m0,060s
 Kotlin version has the same time characteristics as Java version when running on the same JVM.
 
 
-## Future research
+### Rust version
 
-I would like to test equivalent code with some other languages:
+Contributed by [Sam Leonard](https://github.com/tritoke)
 
- * Rust
- * Kotlin transpiled to JS also on node and in the browser
+```console
+$ time build/rust/rust_raw 
+node count: 13537
+checksum: 470936697371
 
-Any contributions are welcome.
+real    0m13,824s
+user    0m13,819s
+sys     0m0,004s
+$ time build/rust/rust_safer 
+node count: 13537
+checksum: 470936697371
+
+real    0m13,801s
+user    0m13,800s
+sys     0m0,001s
+$ time build/rust/almost_pseudo_random 
+checksum: 499999997.12235045
+
+real    1m7,944s
+user    1m7,938s
+sys     0m0,004s
+```
+
+## Future research and contributions
+
+I am looking for concise, deterministic, pseudorandom function, which is simple enough to have
+comparable overhead when implemented in all the languages. The current `almostPseudoRandom`,
+based on trigonometry, seems to be surprisingly expensive to compute and also gives slightly
+different floating point results in Go version, where it is also 2 times faster than in Java and C.
+
+In the future I will also use this project to test how Kotlin transpiles to native code and
+JavaScript.
+
+I will also rerun these tests from time to time, to check how runtimes and compilers evolve,
+because there are several ongoing efforts for improving memory management and garbage collection in
+many of them.
+
+Any future contributions and optimizations of the current code are welcome. For example if you want
+to contribute a version with custom memory allocator, I would suggest to put it in a separate file,
+instead of extending current code, for better overview how the optimization is achieved. Of course
+if there are any straightforward optimizations, or even justified style changes to the current
+examples, feel free to improve them.
