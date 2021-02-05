@@ -17,38 +17,27 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdint.h>
-
-const long ITERATION_COUNT = 1000000000L;
-
-struct xorshift64s_state {
-  uint64_t a;
-};
-
-double xorshift64s(struct xorshift64s_state *state) {
-	uint64_t x = state->a;	/* The state must be seeded with a nonzero value. */
-	x ^= x >> 12; // a
-	x ^= x << 25; // b
-	x ^= x >> 27; // c
-	state->a = x;
-	uint64_t rand_val = x * UINT64_C(0x2545F4914F6CDD1D);
-
-	// mix to a double
-	uint32_t a = rand_val >> 32;
-	uint32_t b = rand_val & 0xFFFFFFFF;
-
-  return ((a >> 5) * 67108864.0 + (b >> 6)) * (1.0 / 9007199254740991.0);
+pub struct Xorshift64sRng {
+    a: u64
 }
 
-int main(void) {
-	struct xorshift64s_state rng_state = {
-		.a = 42
-	};
+impl Xorshift64sRng {
+    pub fn new(a: u64) -> Self {
+        Self { a }
+    }
 
-	double checksum = 0;
-	for (long i = 0; i < ITERATION_COUNT; i++) {
-		checksum += xorshift64s(&rng_state);
-	}
-	printf("checksum: %f\n", checksum);
+    pub fn get_rand(&mut self) -> f64 {
+        let mut x: u64 = self.a;    /* The state must be seeded with a nonzero value. */
+        x ^= x >> 12; // a
+        x ^= x << 25; // b
+        x ^= x >> 27; // c
+        self.a = x;
+        let rand_val: u64 = x * 0x2545F4914F6CDD1D_u64;
+
+        // mix to a double
+        let a: u32 = (rand_val >> 32) as u32;
+        let b: u32 = (rand_val & 0xFFFFFFFF_u64) as u32;
+
+        ((a >> 5) as f64 * 67108864.0 + (b >> 6) as f64) * (1.0 / 9007199254740991.0)
+    }
 }
