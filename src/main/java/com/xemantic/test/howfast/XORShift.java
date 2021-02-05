@@ -1,5 +1,5 @@
 /*
- * Copyright 2021  Kazimierz Pogoda
+ * Copyright 2021  Sam Leonard
  *
  * This file is part of java-2-times-faster-than-c.
  *
