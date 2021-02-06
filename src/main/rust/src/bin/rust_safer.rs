@@ -19,6 +19,11 @@
 
 use std::ptr;
 
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 const MAX_PAYLOAD_SIZE: i32   = 50;
 const INITIAL_NODE_COUNT: i32 = 10000;
 const MUTATION_COUNT: i64     = 1000000;
@@ -27,11 +32,11 @@ const MAX_MUTATION_SIZE: i32  = 200;
 struct Node {
   id: i64,
   payload: Vec<i8>,
-  next: NodePointer,
-  previous: NodePointer,
+  next: Option<NodePointer>,
+  previous: Option<NodePointer>,
 }
 
-type NodePointer = *mut Node;
+type NodePointer = ptr::NonNull<Node>;
 
 fn almost_pseudo_random(ordinal: i64) -> f64 {
   ((ordinal as f64 * 100000.0).sin() + 1.0) % 1.0
@@ -57,28 +62,28 @@ fn main() {
             }
             for _ in 0..delete_count {
                 let to_delete = head;
-                head = (*head).previous;
+                head = (*head.as_ptr()).previous.expect("Head has empty previous node.");
                 Node::delete(to_delete);
             }
             node_count -= delete_count as i64;
             let insert_count = (almost_pseudo_random(mutation_seq) * MAX_MUTATION_SIZE as f64) as i32; mutation_seq += 1;
             for _ in 0..insert_count {
                 Node::insert(head, Node::new(node_id)); node_id += 1;
-                head = (*head).next;
+                head = (*head.as_ptr()).next.expect("Head has empty next node.");
             }
             node_count += insert_count as i64;
         }
         let mut checksum: i64 = 0;
         let mut traveler = head;
         loop {
-            checksum += (*traveler).id as i64 + (*traveler).payload.len() as i64;
-            if let Some(val) = (*traveler).payload.first() {
+            checksum += (*traveler.as_ptr()).id as i64 + (*traveler.as_ptr()).payload.len() as i64;
+            if let Some(val) = (*traveler.as_ptr()).payload.get(0) {
                 checksum += *val as i64;
             }
-            if let Some(val) = (*traveler).payload.last() {
+            if let Some(val) = (*traveler.as_ptr()).payload.last() {
                 checksum += *val as i64;
             }
-            traveler = (*traveler).next;
+            traveler = (*traveler.as_ptr()).next.expect("Traveler has an empty next pointer.");
             if traveler == head { break };
         }
         println!("node count: {}", node_count);
@@ -88,33 +93,39 @@ fn main() {
 
 impl Node {
     fn new(id: i64) -> NodePointer {
-        Box::into_raw(Box::new(Self{
-            id,
-            payload: (0..(almost_pseudo_random(id) * MAX_PAYLOAD_SIZE as f64) as i8).collect(),
-            next: ptr::null_mut(),
-            previous: ptr::null_mut(),
-        }))
+        NodePointer::new(
+            Box::into_raw(Box::new(Self{
+                id,
+                payload: (0..(almost_pseudo_random(id) * MAX_PAYLOAD_SIZE as f64) as i8).collect(),
+                next: None,
+                previous: None,
+            }))
+        ).expect("Failed to Allocate node.")
     }
 
     unsafe fn join(alfa: NodePointer, beta: NodePointer) {
-        (*alfa).previous = beta;
-        (*alfa).next     = beta;
-        (*beta).previous = alfa;
-        (*beta).next     = alfa;
+        (*alfa.as_ptr()).previous = Some(beta);
+        (*alfa.as_ptr()).next     = Some(beta);
+        (*beta.as_ptr()).previous = Some(alfa);
+        (*beta.as_ptr()).next     = Some(alfa);
     }
 
     unsafe fn delete(node: NodePointer) {
-        (*(*node).next).previous = (*node).previous;
-        (*(*node).previous).next = (*node).next;
+        let node_next: NodePointer = (*node.as_ptr()).next.expect("Node to delete has empty next pointer.");
+        let node_prev: NodePointer = (*node.as_ptr()).previous.expect("Node to delete has empty previous pointer.");
+
+        (*node_next.as_ptr()).previous = Some(node_prev);
+        (*node_prev.as_ptr()).next = Some(node_next);
 
         // let the created box do the deallocation when it goes out of scope
-        Box::from_raw(node);
+        Box::from_raw(node.as_ptr());
     }
 
     unsafe fn insert(previous: NodePointer, node: NodePointer) {
-        (*node).next = (*previous).next;
-        (*node).previous = previous;
-        (*(*previous).next).previous = node;
-        (*previous).next = node;
+        (*node.as_ptr()).next = (*previous.as_ptr()).next;
+        (*node.as_ptr()).previous = Some(previous);
+        let prev_next = (*previous.as_ptr()).next.expect("Empty next pointer on previous node in insert.");
+        (*prev_next.as_ptr()).previous = Some(node);
+        (*previous.as_ptr()).next = Some(node);
     }
 }
