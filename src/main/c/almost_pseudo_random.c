@@ -1,5 +1,6 @@
 /*
  * Copyright 2021  Kazimierz Pogoda
+ * Copyright 2021  Sam Leonard
  *
  * This file is part of java-2-times-faster-than-c.
  *
@@ -26,10 +27,12 @@ double almost_pseudo_random(long ordinal) {
   return fmod(sin(((double) ordinal) * 100000.0) + 1.0, 1.0);
 }
 
-void main() {
+int main() {
   double checksum = 0;
   for (long i = 0; i < ITERATION_COUNT; i++) {
     checksum += almost_pseudo_random(i);
   }
   printf("checksum: %f\n", checksum);
+
+	return 0;
 }
