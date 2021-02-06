@@ -17,8 +17,8 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-mod rng;
-use rng::Xorshift64sRng;
+mod xorshift_rng;
+use xorshift_rng::Xorshift64sRng;
 
 use std::ptr;
 
