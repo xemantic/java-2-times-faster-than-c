@@ -1,5 +1,4 @@
 /*
- * Copyright 2021  Kazimierz Pogoda
  * Copyright 2021  Sam Leonard
  *
  * This file is part of java-2-times-faster-than-c.
@@ -19,20 +18,37 @@
  */
 
 #include <stdio.h>
-#include <math.h>
+#include <stdint.h>
 
 const long ITERATION_COUNT = 1000000000L;
 
-double almost_pseudo_random(long ordinal) {
-  return fmod(sin(((double) ordinal) * 100000.0) + 1.0, 1.0);
+struct xorshift64s_state {
+  uint64_t a;
+};
+
+double xorshift64s(struct xorshift64s_state *state) {
+	uint64_t x = state->a;	/* The state must be seeded with a nonzero value. */
+	x ^= x >> 12; // a
+	x ^= x << 25; // b
+	x ^= x >> 27; // c
+	state->a = x;
+	uint64_t rand_val = x * UINT64_C(0x2545F4914F6CDD1D);
+
+	// mix to a double
+	uint32_t a = rand_val >> 32;
+	uint32_t b = rand_val & 0xFFFFFFFF;
+
+  return ((a >> 5) * 67108864.0 + (b >> 6)) * (1.0 / 9007199254740991.0);
 }
 
-int main() {
-  double checksum = 0;
-  for (long i = 0; i < ITERATION_COUNT; i++) {
-    checksum += almost_pseudo_random(i);
-  }
-  printf("checksum: %f\n", checksum);
+int main(void) {
+	struct xorshift64s_state rng_state = {
+		.a = 42
+	};
 
-	return 0;
+	double checksum = 0;
+	for (long i = 0; i < ITERATION_COUNT; i++) {
+		checksum += xorshift64s(&rng_state);
+	}
+	printf("checksum: %f\n", checksum);
 }
