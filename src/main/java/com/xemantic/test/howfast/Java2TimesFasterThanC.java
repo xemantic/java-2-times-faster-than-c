@@ -1,5 +1,6 @@
 /*
  * Copyright 2021  Kazimierz Pogoda
+ * Copyright 2021  Sam Leonard
  *
  * This file is part of java-2-times-faster-than-c.
  *
@@ -33,9 +34,9 @@ public class Java2TimesFasterThanC {
     private Node   previous;
     private Node   next;
 
-    private Node(long id) {
+    private Node(long id, xorshift64s_rng rng) {
       this.id = id;
-      int size = (int) (almostPseudoRandom(id) * (double) MAX_PAYLOAD_SIZE);
+      int size = (int) (rng.get_rand() * (double) MAX_PAYLOAD_SIZE);
       byte[] data = new byte[size];
       for (int i = 0; i < size; i++) {
         data[i] = (byte) i;
@@ -65,21 +66,17 @@ public class Java2TimesFasterThanC {
 
   }
 
-  private static double almostPseudoRandom(long ordinal) {
-    return (Math.sin(((double) ordinal) * 100000.0) + 1.0) % 1.0;
-  }
-
   public static void main(String[] args) {
     long nodeId = 0;
-    long mutationSeq = 0;
-    Node head = new Node(nodeId++);
-    head.join(new Node(nodeId++));
+    xorshift64s_rng rng = new xorshift64s_rng(42);
+    Node head = new Node(nodeId++, rng);
+    head.join(new Node(nodeId++, rng));
     for (int i = 2; i < INITIAL_NODE_COUNT; i++) {
-      head.insert(new Node(nodeId++));
+      head.insert(new Node(nodeId++, rng));
     }
     long nodeCount = INITIAL_NODE_COUNT;
     for (long i = 0; i < MUTATION_COUNT; i++) {
-      int deleteCount = (int) (almostPseudoRandom(mutationSeq++) * (double) MAX_MUTATION_SIZE);
+      int deleteCount = (int) (rng.get_rand() * (double) MAX_MUTATION_SIZE);
       if (deleteCount > (nodeCount - 2)) {
         deleteCount = (int) nodeCount - 2;
       }
@@ -89,9 +86,9 @@ public class Java2TimesFasterThanC {
         toDelete.delete();
       }
       nodeCount -= deleteCount;
-      int insertCount = (int) (almostPseudoRandom(mutationSeq++) * (double) MAX_MUTATION_SIZE);
+      int insertCount = (int) (rng.get_rand() * (double) MAX_MUTATION_SIZE);
       for (int j = 0; j < insertCount; j++) {
-        head.insert(new Node(nodeId++));
+        head.insert(new Node(nodeId++, rng));
         head = head.next;
       }
       nodeCount += insertCount;

@@ -17,6 +17,9 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+mod xorshift_rng;
+use xorshift_rng::Xorshift64sRng;
+
 use std::ptr;
 
 const MAX_PAYLOAD_SIZE: i32   = 50;
@@ -33,25 +36,21 @@ struct Node {
 
 type NodePointer = *mut Node;
 
-fn almost_pseudo_random(ordinal: i64) -> f64 {
-  ((ordinal as f64 * 100000.0).sin() + 1.0) % 1.0
-}
-
 fn main() {
     let mut node_id: i64 = 0;
-    let mut mutation_seq: i64 = 0;
+    let mut rng = Xorshift64sRng::new(42);
 
-    let mut head = Node::new(node_id); node_id += 1;
+    let mut head = Node::new(node_id, &mut rng); node_id += 1;
 
     // hell yeah who needs safety when we have pointers, YEE HAWWW
     unsafe {
-        Node::join(head, Node::new(node_id)); node_id += 1;
+        Node::join(head, Node::new(node_id, &mut rng)); node_id += 1;
         for _ in 2..INITIAL_NODE_COUNT {
-            Node::insert(head, Node::new(node_id)); node_id += 1;
+            Node::insert(head, Node::new(node_id, &mut rng)); node_id += 1;
         }
         let mut node_count: i64 = INITIAL_NODE_COUNT as i64;
         for _ in 0..MUTATION_COUNT {
-            let mut delete_count = (almost_pseudo_random(mutation_seq) * MAX_MUTATION_SIZE as f64) as i32; mutation_seq += 1;
+            let mut delete_count = (rng.get_rand() * MAX_MUTATION_SIZE as f64) as i32;
             if delete_count > (node_count - 2) as i32 {
                 delete_count = (node_count - 2) as i32;
             }
@@ -61,9 +60,9 @@ fn main() {
                 Node::delete(to_delete);
             }
             node_count -= delete_count as i64;
-            let insert_count = (almost_pseudo_random(mutation_seq) * MAX_MUTATION_SIZE as f64) as i32; mutation_seq += 1;
+            let insert_count = (rng.get_rand() * MAX_MUTATION_SIZE as f64) as i32;
             for _ in 0..insert_count {
-                Node::insert(head, Node::new(node_id)); node_id += 1;
+                Node::insert(head, Node::new(node_id, &mut rng)); node_id += 1;
                 head = (*head).next;
             }
             node_count += insert_count as i64;
@@ -87,10 +86,10 @@ fn main() {
 }
 
 impl Node {
-    fn new(id: i64) -> NodePointer {
+    fn new(id: i64, rng: &mut Xorshift64sRng) -> NodePointer {
         Box::into_raw(Box::new(Self{
             id,
-            payload: (0..(almost_pseudo_random(id) * MAX_PAYLOAD_SIZE as f64) as i8).collect(),
+            payload: (0..(rng.get_rand() * MAX_PAYLOAD_SIZE as f64) as i8).collect(),
             next: ptr::null_mut(),
             previous: ptr::null_mut(),
         }))

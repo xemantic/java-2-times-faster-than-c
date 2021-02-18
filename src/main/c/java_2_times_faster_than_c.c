@@ -1,5 +1,6 @@
 /*
  * Copyright 2021  Kazimierz Pogoda
+ * Copyright 2021  Sam Leonard
  *
  * This file is part of java-2-times-faster-than-c.
  *
@@ -18,6 +19,7 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -25,6 +27,24 @@ const int  MAX_PAYLOAD_SIZE   = 50;
 const int  INITIAL_NODE_COUNT = 10000;
 const long MUTATION_COUNT     = 1000000L;
 const int  MAX_MUTATION_SIZE  = 200;
+
+struct xorshift64s_state {
+  uint64_t a;
+};
+
+double xorshift64s(struct xorshift64s_state *state) {
+	uint64_t x = state->a;	/* The state must be seeded with a nonzero value. */
+	x ^= x >> 12; // a
+	x ^= x << 25; // b
+	x ^= x >> 27; // c
+	state->a = x;
+	uint64_t rand_val = x * UINT64_C(0x2545F4914F6CDD1D);
+
+	// mix to a double
+	uint32_t a = rand_val >> 32;
+	uint32_t b = rand_val & 0xFFFFFFFF;
+  return ((a >> 5) * 67108864.0 + (b >> 6)) * (1.0 / 9007199254740991.0);
+}
 
 typedef struct Node Node;
 
@@ -36,12 +56,8 @@ struct Node {
   Node   *next;
 } NodeDef;
 
-double almost_pseudo_random(long ordinal) {
-  return fmod((sin(((double) ordinal) * 100000.0) + 1.0), 1.0);
-}
-
-Node *new_node(long id) {
-  int size = (int) (almost_pseudo_random(id) * MAX_PAYLOAD_SIZE);
+Node *new_node(long id, struct xorshift64s_state * rng_state) {
+  int size = (int) (xorshift64s(rng_state) * MAX_PAYLOAD_SIZE);
   int charId = (char) id;
   Node *node = malloc(sizeof(NodeDef));
   node->id = id;
@@ -77,15 +93,17 @@ void insert(Node *previous, Node *node) {
 
 int main() {
   long node_id = 0;
-  long mutation_seq = 0;
-  Node *head = new_node(node_id++);
-  join(head, new_node(node_id++));
+	struct xorshift64s_state rng_state = {
+		.a = 42,
+	};
+  Node *head = new_node(node_id++, &rng_state);
+  join(head, new_node(node_id++, &rng_state));
   for (int i = 2; i < INITIAL_NODE_COUNT; i++) {
-    insert(head, new_node(node_id++));
+    insert(head, new_node(node_id++, &rng_state));
   }
   long node_count = INITIAL_NODE_COUNT;
   for (long i = 0; i < MUTATION_COUNT; i++) {
-    int delete_count = (int) (almost_pseudo_random(mutation_seq++) * (double) MAX_MUTATION_SIZE);
+    int delete_count = (int) (xorshift64s(&rng_state) * (double) MAX_MUTATION_SIZE);
     if (delete_count > (node_count - 2)) {
       delete_count = (int) node_count - 2;
     }
@@ -95,9 +113,9 @@ int main() {
       delete(to_delete);
     }
     node_count -= delete_count;
-    int insert_count = (int) (almost_pseudo_random(mutation_seq++) * (double) MAX_MUTATION_SIZE);
+    int insert_count = (int) (xorshift64s(&rng_state) * (double) MAX_MUTATION_SIZE);
     for (int j = 0; j < insert_count; j++) {
-      insert(head, new_node(node_id++));
+      insert(head, new_node(node_id++, &rng_state));
       head = head->next;
     }
     node_count += insert_count;

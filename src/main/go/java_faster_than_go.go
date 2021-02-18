@@ -24,7 +24,6 @@ import (
 	"flag"
 	_ "fmt"
 	"log"
-	"math"
 	"os"
 	"runtime/pprof"
 )
@@ -33,6 +32,31 @@ const MaxPayloadSize int   = 50
 const InitialNodeCount int = 10000
 const MutationCount int64  = 1000000
 const MaxMutationSize int  = 200
+
+type xorshift64s_rng struct {
+  a uint64;
+};
+
+func (state * xorshift64s_rng) get_rand() float64 {
+	var x = state.a;	/* The state must be seeded with a nonzero value. */
+	x ^= x >> 12; // a
+	x ^= x << 25; // b
+	x ^= x >> 27; // c
+	state.a = x;
+	var rand_val = x * uint64(0x2545F4914F6CDD1D);
+
+	// mix to a double
+	var a = rand_val >> 32;
+	var b = rand_val & 0xFFFFFFFF;
+
+  return (float64(a >> 5) * 67108864.0 + float64(b >> 6)) * (1.0 / 9007199254740991.0);
+}
+
+func new_rng(a uint64) *xorshift64s_rng  {
+  return &xorshift64s_rng {
+    a: a,
+  };
+}
 
 type Node struct {
 	id      int64
@@ -60,8 +84,8 @@ func (node *Node) join(newNode *Node) {
 	newNode.next = node
 }
 
-func createNode(id int) *Node  {
-	size := int(almostPseudoRandom(int64(id)) * float64(MaxPayloadSize))
+func createNode(id int, rng *xorshift64s_rng) *Node  {
+	size := int(rng.get_rand() * float64(MaxPayloadSize))
   data := make([]byte, size);
   for i := 0; i < size; i++ {
     data[i] = byte(i);
@@ -71,11 +95,6 @@ func createNode(id int) *Node  {
     payload: data,
   }
 }
-
-func almostPseudoRandom(ordinal int64) float64 {
-	return math.Mod(math.Sin(float64(ordinal) * 100000.0) + 1.0, 1.0)
-}
-
 
 var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to `file`")
 
@@ -95,21 +114,20 @@ func main() {
 	}
 
 	nodeId := 0
-	mutationSeq := 0
-	head := createNode(nodeId)
+  rng := new_rng(42);
+	head := createNode(nodeId, rng)
 	nodeId++
-	head.join(createNode(nodeId))
+	head.join(createNode(nodeId, rng))
 	nodeId++
 
 	for i := 2; i < InitialNodeCount; i++ {
-		head.insert(createNode(nodeId))
+		head.insert(createNode(nodeId, rng))
 		nodeId++
 	}
 	nodeCount := InitialNodeCount
 
 	for i := int64(0); i < MutationCount; i++ {
-		deleteCount := int(almostPseudoRandom(int64(mutationSeq)) * float64(MaxMutationSize))
-		mutationSeq++
+		deleteCount := int(rng.get_rand() * float64(MaxMutationSize))
 		if deleteCount > (nodeCount -2) {
 			deleteCount = nodeCount - 2
 		}
@@ -121,11 +139,10 @@ func main() {
 		}
 
 		nodeCount -= deleteCount
-		insertCount := int(almostPseudoRandom(int64(mutationSeq)) * float64(MaxMutationSize))
-		mutationSeq++
+		insertCount := int(rng.get_rand() * float64(MaxMutationSize))
 
 		for j := 0; j < insertCount; j++ {
-			head.insert(createNode(nodeId))
+			head.insert(createNode(nodeId, rng))
 			nodeId++
 			head = head.next
 		}
