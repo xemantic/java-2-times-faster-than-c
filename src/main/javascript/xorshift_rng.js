@@ -14,18 +14,37 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+ * alet with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 const ITERATION_COUNT = 1000000000;
 
-function almostPseudoRandom(ordinal) {
-    return (Math.sin(ordinal * 100000.0) + 1.0) % 1.0;
+class XorShift64SRng {
+    constructor(state) {
+        this.state = state;
+    }
+
+    getRand() {
+        let x = this.state;	/* The state must be seeded with a nonzero value. */
+        x ^= x >> 12n; // a
+        x ^= BigInt.asUintN(64, x << 25n); // b
+        x ^= x >> 27n; // c
+        this.state = x;
+
+        let randVal = BigInt.asUintN(64, x * 0x2545F4914F6CDD1Dn);
+
+        // mix to a double
+        let a = BigInt.asUintN(32, randVal >> 32n);
+        let b = BigInt.asUintN(32, randVal);
+
+        return (Number(a >> 5n) * 67108864.0 + Number(b >> 6n)) * (1.0 / 9007199254740991.0);
+    }
 }
 
+let rng = new XorShift64SRng(42n);
 let checksum = 0;
 for (let i = 0; i < ITERATION_COUNT; i++) {
-    checksum += almostPseudoRandom(i);
+    checksum += rng.getRand();
 }
 
 console.log("checksum: " + checksum);

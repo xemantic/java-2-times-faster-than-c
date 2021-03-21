@@ -8,8 +8,8 @@ group = "com.xemantic.test"
 version = "1.0-SNAPSHOT"
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_15
+  targetCompatibility = JavaVersion.VERSION_15
 }
 dependencies {
   implementation(kotlin("stdlib-jdk8"))
@@ -20,9 +20,9 @@ repositories {
 }
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-  jvmTarget = "11"
+  jvmTarget = "15"
 }
 val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
-  jvmTarget = "11"
+  jvmTarget = "15"
 }
