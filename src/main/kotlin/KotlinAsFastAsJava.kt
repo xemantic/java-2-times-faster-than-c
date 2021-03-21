@@ -26,14 +26,11 @@ private const val INITIAL_NODE_COUNT = 10000
 private const val MUTATION_COUNT     = 1000000L
 private const val MAX_MUTATION_SIZE  = 200
 
-private fun almostPseudoRandom(ordinal: Long) =
-  (sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
-
-private class Node(val id: Long) {
+private class Node(val id: Long, rng: XorShift64SRng) {
   var previous: Node? = null
   var next: Node? = null
   val payload: ByteArray = ByteArray(
-    (almostPseudoRandom(id) * MAX_PAYLOAD_SIZE).toInt()
+    (rng.getRand() * MAX_PAYLOAD_SIZE).toInt()
   )
 
   init {
@@ -61,22 +58,19 @@ private class Node(val id: Long) {
     next?.previous = node
     next = node
   }
-
 }
 
 fun main() {
+  var rng = XorShift64SRng(42UL)
   var nodeId: Long = 0
-  var mutationSeq: Long = 0
-  var head = Node(nodeId++)
-  head.join(Node(nodeId++))
+  var head = Node(nodeId++, rng)
+  head.join(Node(nodeId++, rng))
   for (i in 2 until INITIAL_NODE_COUNT) {
-    head.insert(Node(nodeId++))
+    head.insert(Node(nodeId++, rng))
   }
   var nodeCount = INITIAL_NODE_COUNT.toLong()
   for (i in 0 until MUTATION_COUNT) {
-    var deleteCount =
-      (almostPseudoRandom(mutationSeq++)
-          * MAX_MUTATION_SIZE.toDouble()).toInt()
+    var deleteCount = (rng.getRand() * MAX_MUTATION_SIZE.toDouble()).toInt()
     if (deleteCount > nodeCount - 2) {
       deleteCount = nodeCount.toInt() - 2
     }
@@ -86,11 +80,9 @@ fun main() {
       toDelete.delete()
     }
     nodeCount -= deleteCount.toLong()
-    val insertCount =
-      (almostPseudoRandom(mutationSeq++)
-          * MAX_MUTATION_SIZE.toDouble()).toInt()
+    val insertCount = (rng.getRand() * MAX_MUTATION_SIZE.toDouble()).toInt()
     for (j in 0 until insertCount) {
-      head.insert(Node(nodeId++))
+      head.insert(Node(nodeId++, rng))
       head = head.next!!
     }
     nodeCount += insertCount.toLong()

@@ -19,25 +19,25 @@
 
 package com.xemantic.test.howfast;
 
-class xorshift64s_rng {
+class xorshift64SRng {
 	private long state;
 
-	xorshift64s_rng(long state) {
+	xorshift64SRng(long state) {
 		this.state = state;
 	}
 
-	double get_rand() {
+	double getRand() {
 		long x = this.state;	/* The state must be seeded with a nonzero value. */
 		x ^= x >>> 12; // a
 		x ^= x  << 25; // b
 		x ^= x >>> 27; // c
 		this.state = x;
 
-		long rand_val = x * 0x2545F4914F6CDD1DL;
+		long randVal = x * 0x2545F4914F6CDD1DL;
 
 		// mix to a double
-		long a = (rand_val >>> 32) & 0xFFFFFFFFL;
-		long b = rand_val & 0xFFFFFFFFL;
+		long a = (randVal >>> 32) & 0xFFFFFFFFL;
+		long b = randVal & 0xFFFFFFFFL;
 
 		return ((a >> 5) * 67108864.0 + (b >> 6)) * (1.0 / 9007199254740991.0);
 	}
@@ -48,11 +48,11 @@ public class XORShift {
   private static final long ITERATION_COUNT = 1000000000L;
 
   public static void main(String[] args) {
-		xorshift64s_rng rng = new xorshift64s_rng(42);
+	  xorshift64SRng rng = new xorshift64SRng(42);
 
     double checksum = 0;
     for (long i = 0; i < ITERATION_COUNT; i++) {
-      checksum += rng.get_rand();
+      checksum += rng.getRand();
     }
     System.out.println("checksum: " + checksum);
   }

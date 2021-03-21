@@ -34,9 +34,9 @@ public class Java2TimesFasterThanC {
     private Node   previous;
     private Node   next;
 
-    private Node(long id, xorshift64s_rng rng) {
+    private Node(long id, xorshift64SRng rng) {
       this.id = id;
-      int size = (int) (rng.get_rand() * (double) MAX_PAYLOAD_SIZE);
+      int size = (int) (rng.getRand() * (double) MAX_PAYLOAD_SIZE);
       byte[] data = new byte[size];
       for (int i = 0; i < size; i++) {
         data[i] = (byte) i;
@@ -68,7 +68,7 @@ public class Java2TimesFasterThanC {
 
   public static void main(String[] args) {
     long nodeId = 0;
-    xorshift64s_rng rng = new xorshift64s_rng(42);
+    xorshift64SRng rng = new xorshift64SRng(42);
     Node head = new Node(nodeId++, rng);
     head.join(new Node(nodeId++, rng));
     for (int i = 2; i < INITIAL_NODE_COUNT; i++) {
@@ -76,7 +76,7 @@ public class Java2TimesFasterThanC {
     }
     long nodeCount = INITIAL_NODE_COUNT;
     for (long i = 0; i < MUTATION_COUNT; i++) {
-      int deleteCount = (int) (rng.get_rand() * (double) MAX_MUTATION_SIZE);
+      int deleteCount = (int) (rng.getRand() * (double) MAX_MUTATION_SIZE);
       if (deleteCount > (nodeCount - 2)) {
         deleteCount = (int) nodeCount - 2;
       }
@@ -86,7 +86,7 @@ public class Java2TimesFasterThanC {
         toDelete.delete();
       }
       nodeCount -= deleteCount;
-      int insertCount = (int) (rng.get_rand() * (double) MAX_MUTATION_SIZE);
+      int insertCount = (int) (rng.getRand() * (double) MAX_MUTATION_SIZE);
       for (int j = 0; j < insertCount; j++) {
         head.insert(new Node(nodeId++, rng));
         head = head.next;
@@ -107,5 +107,4 @@ public class Java2TimesFasterThanC {
     System.out.println("node count: " + nodeCount);
     System.out.println("checksum: " + checksum);
   }
-
 }

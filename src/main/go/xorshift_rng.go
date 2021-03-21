@@ -23,39 +23,40 @@ import (
 	"fmt"
 )
 
-const IterationCount int64 = 1000000000
+const iterationCount int64 = 1000000000
 
-type xorshift64s_rng struct {
-  a uint64;
-};
-
-func (state * xorshift64s_rng) get_rand() float64 {
-	var x = state.a;	/* The state must be seeded with a nonzero value. */
-	x ^= x >> 12; // a
-	x ^= x << 25; // b
-	x ^= x >> 27; // c
-	state.a = x;
-	var rand_val = x * uint64(0x2545F4914F6CDD1D);
-
-	// mix to a double
-	var a = rand_val >> 32;
-	var b = rand_val & 0xFFFFFFFF;
-
-  return (float64(a >> 5) * 67108864.0 + float64(b >> 6)) * (1.0 / 9007199254740991.0);
+type xorshift64sRng struct {
+	a uint64
 }
 
-func new_rng(a uint64) *xorshift64s_rng  {
-  return &xorshift64s_rng {
-    a: a,
-  };
+func (state *xorshift64sRng) getRand() float64 {
+	var x = state.a /* The state must be seeded with a nonzero value. */
+	x ^= x >> 12    // a
+	x ^= x << 25    // b
+	x ^= x >> 27    // c
+	state.a = x
+	var randVal = x * uint64(0x2545F4914F6CDD1D)
+
+	// mix to a double
+	var a = randVal >> 32
+	var b = randVal & 0xFFFFFFFF
+
+	return (float64(a>>5)*67108864.0 + float64(b>>6)) * (1.0 / 9007199254740991.0)
+}
+
+func newRng(a uint64) *xorshift64sRng {
+	return &xorshift64sRng{
+		a: a,
+	}
 }
 
 func main() {
-  var rng = new_rng(42);
+	var rng = newRng(42)
 
 	var checksum float64 = 0
-	for i := int64(0); i < IterationCount; i++ {
-		checksum += rng.get_rand();
+	for i := int64(0); i < iterationCount; i++ {
+		checksum += rng.getRand()
 	}
-	fmt.Printf("checksum: %g\n", checksum)
+
+	fmt.Println("checksum:", checksum)
 }

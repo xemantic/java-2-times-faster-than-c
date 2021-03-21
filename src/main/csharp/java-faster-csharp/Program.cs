@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
+using XorShift;
 
 namespace csharp
 {
     static class Program
     {
-
         private const int  MaxPayloadSize   = 50;
         private const int  InitialNodeCount = 10000;
         private const long MutationCount    = 1000000L;
@@ -18,10 +18,10 @@ namespace csharp
             public long Id { get; }
             public byte[] Payload { get; }
 
-            public Node(long id)
+            public Node(long id, XorShift64SRng rng)
             {
                 Id = id;
-                int size = (int) (AlmostPseudoRandom(id) * (double) MaxPayloadSize);
+                int size = (int) (rng.getRand() * (double) MaxPayloadSize);
                 byte[] data = new byte[size];
                 for (int i = 0; i < size; i++)
                 {
@@ -58,26 +58,21 @@ namespace csharp
             }
         }
 
-        private static double AlmostPseudoRandom(long ordinal)
-        {
-            return (Math.Sin(((double) ordinal) * 100000.0) + 1.0) % 1.0;
-        }
-
         static void Main(string[] args)
         {
             long nodeId = 0;
-            long mutationSeq = 0;
-            var head = new Node(nodeId++);
-            head.Join(new Node(nodeId++));
+            XorShift64SRng rng = new XorShift64SRng(42);
+            var head = new Node(nodeId++, rng);
+            head.Join(new Node(nodeId++, rng));
             for (var i = 2; i < InitialNodeCount; i++)
             {
-                head.Insert(new Node(nodeId++));
+                head.Insert(new Node(nodeId++, rng));
             }
 
             long nodeCount = InitialNodeCount;
             for (long i = 0; i < MutationCount; i++)
             {
-                var deleteCount = (int) (AlmostPseudoRandom(mutationSeq++) * (double) MaxMutationSize);
+                var deleteCount = (int) (rng.getRand() * (double) MaxMutationSize);
                 if (deleteCount > (nodeCount - 2))
                 {
                     deleteCount = (int) nodeCount - 2;
@@ -91,10 +86,10 @@ namespace csharp
                 }
 
                 nodeCount -= deleteCount;
-                var insertCount = (int) (AlmostPseudoRandom(mutationSeq++) * (double) MaxMutationSize);
+                var insertCount = (int) (rng.getRand() * (double) MaxMutationSize);
                 for (int j = 0; j < insertCount; j++)
                 {
-                    head.Insert(new Node(nodeId++));
+                    head.Insert(new Node(nodeId++, rng));
                     head = head.Next;
                 }
 

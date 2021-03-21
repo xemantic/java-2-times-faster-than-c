@@ -23,12 +23,34 @@ import kotlin.math.sin
 
 const val ITERATION_COUNT = 1000000000L
 
+@ExperimentalUnsignedTypes
+class XorShift64SRng(var state: ULong) {
+  init {
+    assert(state != 0UL)
+  }
+
+  fun getRand(): Double {
+    var x: ULong = state /* The state must be seeded with a nonzero value. */
+    x = x xor (x shr 12) // a
+    x = x xor (x shl 25) // b
+    x = x xor (x shr 27) // c
+
+    state = x
+    val rand_val: ULong = x * 0x2545F4914F6CDD1DUL;
+
+    // mix to a double
+    val a = (rand_val shr 32).toUInt()
+    val b = (rand_val and 0xFFFFFFFFU).toUInt()
+
+    return ((a shr 5).toDouble() * 67108864.0 + (b shr 6).toDouble()) * (1.0 / 9007199254740991.0)
+  }
+}
+
 fun main() {
-  fun almostPseudoRandom(ordinal: Long) =
-    (sin(ordinal.toDouble() * 100000.0) + 1.0) % 1.0
+  var rng = XorShift64SRng(42UL);
   var checksum = 0.0
   for (i in 0 until ITERATION_COUNT) {
-    checksum += almostPseudoRandom(i)
+    checksum += rng.getRand()
   }
   println("checksum: $checksum")
 }
